@@ -1,0 +1,13 @@
+apiVersion: goal.plausible.crossplane.io/v1alpha1
+kind: Goal
+metadata:
+  name: example-event-goal
+spec:
+  forProvider:
+    # Reference the site by name
+    siteDomainRef:
+      name: example-site
+    goalType: event
+    eventName: "Signup"
+  providerConfigRef:
+    name: default

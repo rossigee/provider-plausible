@@ -1,0 +1,13 @@
+apiVersion: site.plausible.crossplane.io/v1alpha1
+kind: Site
+metadata:
+  name: example-site
+spec:
+  forProvider:
+    domain: example.com
+    # Optional: Specify a team ID to associate the site with
+    # teamID: "team-123"
+    # Optional: Set timezone (defaults to UTC)
+    # timezone: "America/New_York"
+  providerConfigRef:
+    name: default

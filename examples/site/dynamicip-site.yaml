@@ -1,0 +1,10 @@
+apiVersion: site.plausible.crossplane.io/v1alpha1
+kind: Site
+metadata:
+  name: dynamicip-site
+spec:
+  forProvider:
+    domain: dynamicip.golder.org
+    timezone: Asia/Bangkok
+  providerConfigRef:
+    name: default

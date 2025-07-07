@@ -1,0 +1,11 @@
+apiVersion: goal.plausible.crossplane.io/v1alpha1
+kind: Goal
+metadata:
+  name: newsletter-signup
+spec:
+  forProvider:
+    siteDomain: debs.golder.tech
+    goalType: event
+    eventName: newsletter_signup
+  providerConfigRef:
+    name: default

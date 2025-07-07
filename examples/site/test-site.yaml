@@ -1,0 +1,10 @@
+apiVersion: site.plausible.crossplane.io/v1alpha1
+kind: Site
+metadata:
+  name: test-site
+spec:
+  forProvider:
+    domain: debs.golder.tech
+    timezone: Asia/Bangkok
+  providerConfigRef:
+    name: default

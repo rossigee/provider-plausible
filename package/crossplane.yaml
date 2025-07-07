@@ -1,0 +1,23 @@
+apiVersion: meta.pkg.crossplane.io/v1alpha1
+kind: Provider
+metadata:
+  name: provider-plausible
+  annotations:
+    meta.crossplane.io/maintainer: Crossplane Maintainers <info@crossplane.io>
+    meta.crossplane.io/source: github.com/crossplane-contrib/provider-plausible
+    meta.crossplane.io/license: Apache-2.0
+    meta.crossplane.io/description: |
+      A Crossplane provider for managing Plausible Analytics resources.
+    meta.crossplane.io/readme: |
+      `provider-plausible` is the Crossplane infrastructure provider for
+      [Plausible Analytics](https://plausible.io/).
+
+      Available resources include:
+      * Sites
+      * Goals
+      * Shared Links
+      * Guests
+
+spec:
+  crossplane:
+    version: ">=v1.14.0"

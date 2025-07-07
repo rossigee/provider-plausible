@@ -1,0 +1,12 @@
+apiVersion: goal.plausible.crossplane.io/v1alpha1
+kind: Goal
+metadata:
+  name: example-page-goal
+spec:
+  forProvider:
+    # Directly specify the site domain
+    siteDomain: "example.com"
+    goalType: page
+    pagePath: "/thank-you"
+  providerConfigRef:
+    name: default
