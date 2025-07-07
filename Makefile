@@ -59,16 +59,8 @@ submodules:
 go.cachedir:
 	@go env GOCACHE
 
-# Generate deepcopy, managed resource methods, CRDs, RBAC role.
-generate: generate.init
-	@$(MAKE) go.generate
-
-# Generate deepcopy, managed resource methods, CRDs, RBAC role without
-# dependencies.
-generate.init:
-	@$(INFO) Initializing code generation tools
-	@cd $(TOOLS_HOST_DIR) && $(GOHOST) install -tags generate sigs.k8s.io/controller-tools/cmd/controller-gen@v0.13.0
-	@cd $(TOOLS_HOST_DIR) && $(GOHOST) install -tags generate github.com/crossplane/crossplane-tools/cmd/angryjet@master
+# Use the default generate targets from build system
+# The build system already handles code generation properly
 
 # NOTE: we must ensure up is installed in tool cache prior to build as including the k8s_tools
 # machinery prior to the xpkg machinery sets UP to point to tool cache.
@@ -85,14 +77,14 @@ run: go.build
 # NOTE: we ensure up is installed prior to running platform-specific packaging steps in xpkg.build.
 xpkg.build: $(UP)
 
-.PHONY: submodules generate.init run
+.PHONY: submodules run
 
 # Additional targets
 
-# Run tests
-test: generate
-	@$(INFO) Running tests...
-	@$(GO) test -v ./...
+# Use the default test target from build system
+# test: generate
+#	@$(INFO) Running tests...
+#	@$(GO) test -v ./...
 
 # Run tests with coverage
 test.cover: generate
