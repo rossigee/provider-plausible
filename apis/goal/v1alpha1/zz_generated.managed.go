@@ -26,27 +26,27 @@ func (mg *Goal) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
 
 // GetDeletionPolicy of this Goal.
 func (mg *Goal) GetDeletionPolicy() xpv1.DeletionPolicy {
-	return mg.Spec.DeletionPolicy
+	return mg.Spec.ResourceSpec.DeletionPolicy
 }
 
 // GetManagementPolicies of this Goal.
 func (mg *Goal) GetManagementPolicies() xpv1.ManagementPolicies {
-	return mg.Spec.ManagementPolicies
+	return mg.Spec.ResourceSpec.ManagementPolicies
 }
 
 // GetProviderConfigReference of this Goal.
 func (mg *Goal) GetProviderConfigReference() *xpv1.Reference {
-	return mg.Spec.ProviderConfigReference
+	return mg.Spec.ResourceSpec.ProviderConfigReference
 }
 
 // GetPublishConnectionDetailsTo of this Goal.
 func (mg *Goal) GetPublishConnectionDetailsTo() *xpv1.PublishConnectionDetailsTo {
-	return mg.Spec.PublishConnectionDetailsTo
+	return mg.Spec.ResourceSpec.PublishConnectionDetailsTo
 }
 
 // GetWriteConnectionSecretToReference of this Goal.
 func (mg *Goal) GetWriteConnectionSecretToReference() *xpv1.SecretReference {
-	return mg.Spec.WriteConnectionSecretToReference
+	return mg.Spec.ResourceSpec.WriteConnectionSecretToReference
 }
 
 // SetConditions of this Goal.
@@ -56,25 +56,25 @@ func (mg *Goal) SetConditions(c ...xpv1.Condition) {
 
 // SetDeletionPolicy of this Goal.
 func (mg *Goal) SetDeletionPolicy(r xpv1.DeletionPolicy) {
-	mg.Spec.DeletionPolicy = r
+	mg.Spec.ResourceSpec.DeletionPolicy = r
 }
 
 // SetManagementPolicies of this Goal.
 func (mg *Goal) SetManagementPolicies(r xpv1.ManagementPolicies) {
-	mg.Spec.ManagementPolicies = r
+	mg.Spec.ResourceSpec.ManagementPolicies = r
 }
 
 // SetProviderConfigReference of this Goal.
 func (mg *Goal) SetProviderConfigReference(r *xpv1.Reference) {
-	mg.Spec.ProviderConfigReference = r
+	mg.Spec.ResourceSpec.ProviderConfigReference = r
 }
 
 // SetPublishConnectionDetailsTo of this Goal.
 func (mg *Goal) SetPublishConnectionDetailsTo(r *xpv1.PublishConnectionDetailsTo) {
-	mg.Spec.PublishConnectionDetailsTo = r
+	mg.Spec.ResourceSpec.PublishConnectionDetailsTo = r
 }
 
 // SetWriteConnectionSecretToReference of this Goal.
 func (mg *Goal) SetWriteConnectionSecretToReference(r *xpv1.SecretReference) {
-	mg.Spec.WriteConnectionSecretToReference = r
+	mg.Spec.ResourceSpec.WriteConnectionSecretToReference = r
 }
