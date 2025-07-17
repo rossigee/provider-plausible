@@ -21,7 +21,7 @@ import xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 
 // GetCondition of this Goal.
 func (mg *Goal) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
-	return mg.Status.GetCondition(ct)
+	return mg.Status.ResourceStatus.GetCondition(ct)
 }
 
 // GetDeletionPolicy of this Goal.
@@ -51,7 +51,7 @@ func (mg *Goal) GetWriteConnectionSecretToReference() *xpv1.SecretReference {
 
 // SetConditions of this Goal.
 func (mg *Goal) SetConditions(c ...xpv1.Condition) {
-	mg.Status.SetConditions(c...)
+	mg.Status.ResourceStatus.SetConditions(c...)
 }
 
 // SetDeletionPolicy of this Goal.

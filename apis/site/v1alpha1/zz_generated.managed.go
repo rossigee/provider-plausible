@@ -21,7 +21,7 @@ import xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 
 // GetCondition of this Site.
 func (mg *Site) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
-	return mg.Status.GetCondition(ct)
+	return mg.Status.ResourceStatus.GetCondition(ct)
 }
 
 // GetDeletionPolicy of this Site.
@@ -51,7 +51,7 @@ func (mg *Site) GetWriteConnectionSecretToReference() *xpv1.SecretReference {
 
 // SetConditions of this Site.
 func (mg *Site) SetConditions(c ...xpv1.Condition) {
-	mg.Status.SetConditions(c...)
+	mg.Status.ResourceStatus.SetConditions(c...)
 }
 
 // SetDeletionPolicy of this Site.

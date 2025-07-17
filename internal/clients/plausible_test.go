@@ -71,6 +71,7 @@ func TestNewClient(t *testing.T) {
 
 	if client == nil {
 		t.Error("NewClient() returned nil")
+		return
 	}
 
 	if client.config.BaseURL != cfg.BaseURL {

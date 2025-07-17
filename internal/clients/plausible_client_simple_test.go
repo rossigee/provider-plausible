@@ -70,7 +70,7 @@ func TestClient_GetSite(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(tt.responseCode)
 				if tt.responseBody != nil {
-					json.NewEncoder(w).Encode(tt.responseBody)
+					_ = json.NewEncoder(w).Encode(tt.responseBody)
 				}
 			}))
 			defer server.Close()
@@ -121,7 +121,7 @@ func TestClient_CreateSite_Simple(t *testing.T) {
 			"domain":   req.Domain,
 			"timezone": req.Timezone,
 		}
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}))
 	defer server.Close()
 
@@ -145,6 +145,7 @@ func TestClient_CreateSite_Simple(t *testing.T) {
 	}
 	if site == nil {
 		t.Error("Expected site but got nil")
+		return
 	}
 	if site.Domain != "test.example.com" {
 		t.Errorf("Expected domain 'test.example.com', got %s", site.Domain)
@@ -167,7 +168,7 @@ func TestClient_UpdateSite_Simple(t *testing.T) {
 			"domain":   "new.example.com",
 			"timezone": "UTC",
 		}
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}))
 	defer server.Close()
 
@@ -186,6 +187,7 @@ func TestClient_UpdateSite_Simple(t *testing.T) {
 	}
 	if site == nil {
 		t.Error("Expected site but got nil")
+		return
 	}
 	if site.Domain != "new.example.com" {
 		t.Errorf("Expected domain 'new.example.com', got %s", site.Domain)
