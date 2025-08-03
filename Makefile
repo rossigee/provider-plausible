@@ -9,6 +9,8 @@ PLATFORMS ?= linux_amd64 linux_arm64
 -include build/makelib/output.mk
 
 # Setup Go
+# Override golangci-lint version for modern Go support
+GOLANGCILINT_VERSION ?= 2.3.1
 NPROCS ?= 1
 GO_TEST_PARALLEL := $(shell echo $$(( $(NPROCS) / 2 )))
 GO_STATIC_PACKAGES = $(GO_PROJECT)/cmd/provider
@@ -27,10 +29,14 @@ UPTEST_VERSION = v0.11.1
 IMAGES = provider-plausible
 -include build/makelib/imagelight.mk
 
-# Setup XPKG
-XPKG_REG_ORGS ?= xpkg.upbound.io/crossplane-contrib
-# NOTE: skip promoting on xpkg.upbound.io as channel tags are inferred.
-XPKG_REG_ORGS_NO_PROMOTE ?= xpkg.upbound.io/crossplane-contrib
+# Setup XPKG - Standardized registry configuration
+# Primary registry: GitHub Container Registry under rossigee
+XPKG_REG_ORGS ?= ghcr.io/rossigee
+XPKG_REG_ORGS_NO_PROMOTE ?= ghcr.io/rossigee
+
+# Optional registries (can be enabled via environment variables)
+# To enable Harbor: export ENABLE_HARBOR_PUBLISH=true make publish XPKG_REG_ORGS=harbor.golder.lan/library
+# To enable Upbound: export ENABLE_UPBOUND_PUBLISH=true make publish XPKG_REG_ORGS=xpkg.upbound.io/crossplane-contrib
 XPKGS = provider-plausible
 -include build/makelib/xpkg.mk
 
@@ -39,7 +45,7 @@ XPKGS = provider-plausible
 xpkg.build.provider-plausible: do.build.images
 
 # Setup Package Metadata
-export CROSSPLANE_VERSION := $(shell go list -m -f '{{.Version}}' github.com/crossplane/crossplane)
+export CROSSPLANE_VERSION := $(shell go list -m -f '{{.Version}}' github.com/crossplane/crossplane-runtime)
 -include build/makelib/local.xpkg.mk
 -include build/makelib/controlplane.mk
 
