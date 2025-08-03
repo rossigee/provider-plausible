@@ -1,10 +1,17 @@
 # Crossplane Provider for Plausible Analytics
 
+**✅ BUILD STATUS: WORKING** - Successfully builds after CLI compatibility fixes (v1.1.0)
+
 [![Build Status](https://github.com/crossplane-contrib/provider-plausible/workflows/CI/badge.svg)](https://github.com/crossplane-contrib/provider-plausible/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/crossplane-contrib/provider-plausible)](https://goreportcard.com/report/github.com/crossplane-contrib/provider-plausible)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A [Crossplane](https://crossplane.io/) provider for managing [Plausible Analytics](https://plausible.io/) resources programmatically through Kubernetes.
+
+## Container Registry
+- **Primary**: `ghcr.io/rossigee/provider-plausible:v1.1.0`
+- **Harbor**: Available via environment configuration
+- **Upbound**: Available via environment configuration
 
 ## Overview
 
@@ -33,7 +40,7 @@ The Plausible provider enables platform teams to manage Plausible Analytics site
 ### Quick Start
 
 ```bash
-kubectl crossplane install provider ghcr.io/crossplane-contrib/provider-plausible:v0.1.0
+kubectl crossplane install provider ghcr.io/rossigee/provider-plausible:v1.1.0
 ```
 
 ### Declarative Installation
@@ -44,7 +51,7 @@ kind: Provider
 metadata:
   name: provider-plausible
 spec:
-  package: ghcr.io/crossplane-contrib/provider-plausible:v0.1.0
+  package: ghcr.io/rossigee/provider-plausible:v1.1.0
 ```
 
 ## Configuration
@@ -315,7 +322,7 @@ kind: Provider
 metadata:
   name: provider-plausible
 spec:
-  package: ghcr.io/crossplane-contrib/provider-plausible:v0.1.0
+  package: ghcr.io/rossigee/provider-plausible:v1.1.0
   runtimeConfigRef:
     name: debug-config
 ---

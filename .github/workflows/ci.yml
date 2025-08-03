@@ -2,46 +2,53 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches:
+      - master
+      - main
+      - release-*
+  pull_request: {}
+  workflow_dispatch: {}
 
 env:
+  # Common versions
   GO_VERSION: '1.23'
-  GOLANGCI_VERSION: 'v1.55'
+  GOLANGCI_VERSION: 'v1.61'
+  DOCKER_BUILDX_VERSION: 'v0.22.0'
+
+  # Registry configuration - PRIMARY: GitHub Container Registry only
+  REGISTRY_ORG: 'ghcr.io/rossigee'
 
 jobs:
   detect-noop:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       noop: ${{ steps.noop.outputs.should_skip }}
     steps:
       - name: Detect No-op Changes
         id: noop
-        uses: fkirc/skip-duplicate-actions@v5.3.0
+        uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           paths_ignore: '["**.md", "**.png", "**.jpg"]'
           do_not_skip: '["workflow_dispatch", "schedule", "push"]'
 
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           submodules: true
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Go Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: |
             ~/.cache/go-build
@@ -51,32 +58,30 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Vendor Dependencies
-        run: go mod vendor
+        run: make vendor vendor.check
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # v6
         with:
           version: ${{ env.GOLANGCI_VERSION }}
-          args: --timeout=10m
 
   check-diff:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           submodules: true
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Go Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: |
             ~/.cache/go-build
@@ -86,32 +91,31 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Vendor Dependencies
-        run: go mod vendor
+        run: make vendor vendor.check
 
       - name: Check Diff
-        run: |
-          make reviewable
-          git diff --exit-code
+        run: make check-diff
 
   unit-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           submodules: true
-          fetch-depth: 0
+
+      - name: Fetch History
+        run: git fetch --prune --unshallow
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Go Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: |
             ~/.cache/go-build
@@ -121,37 +125,60 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Vendor Dependencies
-        run: go mod vendor
+        run: make vendor vendor.check
 
       - name: Run Unit Tests
-        run: |
-          make test
+        run: make -j2 test
 
-      - name: Upload Coverage Reports
-        uses: codecov/codecov-action@v3
+      - name: Publish Unit Test Coverage
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.txt
-          verbose: true
+          flags: unittests
+          file: _output/tests/linux_amd64/coverage.txt
 
-  build:
-    runs-on: ubuntu-22.04
-    needs: detect-noop
-    if: needs.detect-noop.outputs.noop != 'true'
-
+  publish-artifacts:
+    runs-on: ubuntu-24.04
+    needs: [lint, check-diff, unit-tests]
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     steps:
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
+        with:
+          platforms: all
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
+        with:
+          version: ${{ env.DOCKER_BUILDX_VERSION }}
+          install: true
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           submodules: true
 
+      - name: Fetch History
+        run: git fetch --prune --unshallow
+
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
       - name: Cache Go Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: |
             ~/.cache/go-build
@@ -161,81 +188,11 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Vendor Dependencies
-        run: go mod vendor
+        run: make vendor vendor.check
 
-      - name: Build Binary
+      - name: Build and Publish Artifacts
         run: |
           make build
-
-      - name: Build Package
-        run: |
-          make build.all
-
-      - name: Upload Package
-        uses: actions/upload-artifact@v4
-        with:
-          name: package
-          path: _output/xpkg/*.xpkg
-
-  publish-artifacts:
-    runs-on: ubuntu-22.04
-    needs: [lint, check-diff, unit-tests, build]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Harbor Registry
-        uses: docker/login-action@v3
-        with:
-          registry: harbor.golder.lan
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        if: env.DOCKERHUB_USERNAME != ''
+          make publish REGISTRY_ORGS="${{ env.REGISTRY_ORG }}"
         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and Push
-        run: |
-          # Get version from git
-          VERSION=$(git describe --tags --always --dirty)
-          
-          # Build and push to Harbor
-          make docker.build docker.push \
-            REGISTRY=harbor.golder.lan/library \
-            VERSION=${VERSION}
-          
-          # Also push to GitHub Container Registry if credentials available
-          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
-            make docker.build docker.push \
-              REGISTRY=ghcr.io/crossplane-contrib \
-              VERSION=${VERSION}
-          fi
-
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+          BUILD_ARGS: "--load"
