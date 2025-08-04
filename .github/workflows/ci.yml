@@ -2,21 +2,30 @@ name: CI
 
 on:
   push:
+    branches: 
+      - master
+      - release-*
+  pull_request:
     branches:
       - master
-      - main
       - release-*
-  pull_request: {}
-  workflow_dispatch: {}
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  actions: read
 
 env:
-  # Common versions
-  GO_VERSION: '1.23'
-  GOLANGCI_VERSION: 'v1.61'
-  DOCKER_BUILDX_VERSION: 'v0.22.0'
-
-  # Registry configuration - PRIMARY: GitHub Container Registry only
-  REGISTRY_ORG: 'ghcr.io/rossigee'
+  GO_VERSION: '1.24.5'
+  GOLANGCI_VERSION: 'latest'
+  GOLANGCILINT_VERSION: '2.3.1'
+  DOCKER_BUILDX_VERSION: 'v0.11.2'
+  # Registry configuration
+  PRIMARY_REGISTRY: ghcr.io/rossigee
+  ENABLE_HARBOR_PUBLISH: false
+  ENABLE_UPBOUND_PUBLISH: false
 
 jobs:
   detect-noop:
@@ -26,7 +35,7 @@ jobs:
     steps:
       - name: Detect No-op Changes
         id: noop
-        uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
+        uses: fkirc/skip-duplicate-actions@v5.3.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           paths_ignore: '["**.md", "**.png", "**.jpg"]'
@@ -36,163 +45,187 @@ jobs:
     runs-on: ubuntu-24.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
+
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Setup Go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Cache Go Dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Vendor Dependencies
-        run: make vendor vendor.check
+        run: go mod vendor
 
       - name: Lint
-        uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # v6
-        with:
-          version: ${{ env.GOLANGCI_VERSION }}
+        run: make lint
 
   check-diff:
     runs-on: ubuntu-24.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
+
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Setup Go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Cache Go Dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Vendor Dependencies
-        run: make vendor vendor.check
+        run: go mod vendor
 
       - name: Check Diff
-        run: make check-diff
+        run: |
+          make reviewable
+          git diff --exit-code
 
   unit-tests:
     runs-on: ubuntu-24.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
+
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@v4
         with:
           submodules: true
-
-      - name: Fetch History
-        run: git fetch --prune --unshallow
+          fetch-depth: 0
 
       - name: Setup Go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Cache Go Dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Vendor Dependencies
-        run: make vendor vendor.check
+        run: go mod vendor
 
       - name: Run Unit Tests
-        run: make -j2 test
+        run: |
+          make test
 
-      - name: Publish Unit Test Coverage
-        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5
+      - name: Upload Coverage Reports
+        uses: codecov/codecov-action@v4
         with:
-          flags: unittests
-          file: _output/tests/linux_amd64/coverage.txt
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.out
+          verbose: true
+
+  security-scan:
+    runs-on: ubuntu-24.04
+    needs: detect-noop
+    if: needs.detect-noop.outputs.noop != 'true'
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Vendor Dependencies
+        run: go mod vendor
+
+      - name: Run Go Vulnerability Check
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: '-no-fail -fmt sarif -out gosec-results.sarif ./...'
+        continue-on-error: true
+
+      - name: Fix Gosec SARIF format
+        if: always() && hashFiles('gosec-results.sarif') != ''
+        run: |
+          if [ -f gosec-results.sarif ]; then
+            jq '.runs[].results[].locations[].physicalLocation.artifactLocation.uri |= if . == null or . == "" then "." else . end' gosec-results.sarif > gosec-results-fixed.sarif
+            mv gosec-results-fixed.sarif gosec-results.sarif
+          fi
+
+      - name: Upload Gosec Results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('gosec-results.sarif') != ''
+        with:
+          sarif_file: gosec-results.sarif
+          category: gosec
 
   publish-artifacts:
     runs-on: ubuntu-24.04
-    needs: [lint, check-diff, unit-tests]
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    needs: [lint, check-diff, unit-tests, security-scan]
+    if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       packages: write
-      attestations: write
       id-token: write
+
     steps:
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
-        with:
-          platforms: all
-
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
-        with:
-          version: ${{ env.DOCKER_BUILDX_VERSION }}
-          install: true
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: true
 
-      - name: Fetch History
-        run: git fetch --prune --unshallow
-
       - name: Setup Go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Cache Go Dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Vendor Dependencies
-        run: make vendor vendor.check
+        run: go mod vendor
 
-      - name: Build and Publish Artifacts
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT_TOKEN }}
+
+      - name: Login to Harbor Registry (Optional)
+        if: env.ENABLE_HARBOR_PUBLISH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: harbor.golder.lan
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Build and Push to Primary Registry
         run: |
-          make build
-          make publish REGISTRY_ORGS="${{ env.REGISTRY_ORG }}"
+          # Build and push to GitHub Container Registry (primary)
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository owner: ${{ github.repository_owner }}"
+          make publish REGISTRY_ORGS="ghcr.io/${{ github.repository_owner }}" XPKG_REG_ORGS="ghcr.io/${{ github.repository_owner }}"
+
+      - name: Build and Push to Harbor (Optional)
+        if: env.ENABLE_HARBOR_PUBLISH == 'true'
+        run: |
+          # Push to Harbor Registry
+          make publish REGISTRY_ORGS="harbor.golder.lan/library"
+
+      - name: Build and Push to Upbound Registry (Optional)
+        if: env.ENABLE_UPBOUND_PUBLISH == 'true'
+        run: |
+          # Push to Upbound Registry (only if token is available)
+          if [ -n "$UPBOUND_TOKEN" ]; then
+            make publish REGISTRY_ORGS="xpkg.upbound.io/crossplane-contrib"
+          else
+            echo "UPBOUND_TOKEN not available, skipping Upbound registry push"
+          fi
         env:
-          BUILD_ARGS: "--load"
+          UPBOUND_TOKEN: ${{ secrets.UPBOUND_TOKEN }}
