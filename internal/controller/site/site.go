@@ -31,9 +31,9 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	sitev1alpha1 "github.com/crossplane-contrib/provider-plausible/apis/site/v1alpha1"
-	"github.com/crossplane-contrib/provider-plausible/apis/v1beta1"
-	"github.com/crossplane-contrib/provider-plausible/internal/clients"
+	sitev1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
+	"github.com/rossigee/provider-plausible/apis/v1beta1"
+	"github.com/rossigee/provider-plausible/internal/clients"
 )
 
 const (

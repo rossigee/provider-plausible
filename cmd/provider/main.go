@@ -31,9 +31,9 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
 
-	"github.com/crossplane-contrib/provider-plausible/apis"
-	"github.com/crossplane-contrib/provider-plausible/internal/controller"
-	"github.com/crossplane-contrib/provider-plausible/internal/features"
+	"github.com/rossigee/provider-plausible/apis"
+	"github.com/rossigee/provider-plausible/internal/controller"
+	"github.com/rossigee/provider-plausible/internal/features"
 )
 
 func main() {

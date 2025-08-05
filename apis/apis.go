@@ -20,9 +20,9 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	goalv1alpha1 "github.com/crossplane-contrib/provider-plausible/apis/goal/v1alpha1"
-	sitev1alpha1 "github.com/crossplane-contrib/provider-plausible/apis/site/v1alpha1"
-	v1beta1 "github.com/crossplane-contrib/provider-plausible/apis/v1beta1"
+	goalv1alpha1 "github.com/rossigee/provider-plausible/apis/goal/v1alpha1"
+	sitev1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
+	v1beta1 "github.com/rossigee/provider-plausible/apis/v1beta1"
 )
 
 func init() {

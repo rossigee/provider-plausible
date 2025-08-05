@@ -31,8 +31,8 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/crossplane/crossplane-runtime/pkg/test"
 
-	v1alpha1 "github.com/crossplane-contrib/provider-plausible/apis/site/v1alpha1"
-	"github.com/crossplane-contrib/provider-plausible/internal/clients"
+	v1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
+	"github.com/rossigee/provider-plausible/internal/clients"
 )
 
 // PlausibleService defines the interface for Plausible operations

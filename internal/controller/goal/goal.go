@@ -32,10 +32,10 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	goalv1alpha1 "github.com/crossplane-contrib/provider-plausible/apis/goal/v1alpha1"
-	sitev1alpha1 "github.com/crossplane-contrib/provider-plausible/apis/site/v1alpha1"
-	"github.com/crossplane-contrib/provider-plausible/apis/v1beta1"
-	"github.com/crossplane-contrib/provider-plausible/internal/clients"
+	goalv1alpha1 "github.com/rossigee/provider-plausible/apis/goal/v1alpha1"
+	sitev1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
+	"github.com/rossigee/provider-plausible/apis/v1beta1"
+	"github.com/rossigee/provider-plausible/internal/clients"
 )
 
 const (

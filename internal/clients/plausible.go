@@ -31,7 +31,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-plausible/apis/v1beta1"
+	"github.com/rossigee/provider-plausible/apis/v1beta1"
 )
 
 const (

@@ -21,9 +21,9 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/controller"
 
-	"github.com/crossplane-contrib/provider-plausible/internal/controller/config"
-	"github.com/crossplane-contrib/provider-plausible/internal/controller/goal"
-	"github.com/crossplane-contrib/provider-plausible/internal/controller/site"
+	"github.com/rossigee/provider-plausible/internal/controller/config"
+	"github.com/rossigee/provider-plausible/internal/controller/goal"
+	"github.com/rossigee/provider-plausible/internal/controller/site"
 )
 
 // Setup creates all Plausible controllers with the supplied logger and adds them to
