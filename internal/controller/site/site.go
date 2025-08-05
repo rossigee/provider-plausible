@@ -229,18 +229,23 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	return managed.ExternalUpdate{}, nil
 }
 
-func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*sitev1alpha1.Site)
 	if !ok {
-		return errors.New(errNotSite)
+		return managed.ExternalDelete{}, errors.New(errNotSite)
 	}
 
 	cr.SetConditions(xpv1.Deleting())
 
 	err := c.service.DeleteSite(meta.GetExternalName(cr))
 	if err != nil && !clients.IsNotFound(err) {
-		return errors.Wrap(err, "failed to delete site")
+		return managed.ExternalDelete{}, errors.Wrap(err, "failed to delete site")
 	}
 
+	return managed.ExternalDelete{}, nil
+}
+
+func (c *external) Disconnect(ctx context.Context) error {
+	// Nothing to disconnect for Plausible API client
 	return nil
 }

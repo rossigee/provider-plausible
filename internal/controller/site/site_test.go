@@ -168,19 +168,23 @@ func (c *testExternal) Update(ctx context.Context, mg resource.Managed) (managed
 	return managed.ExternalUpdate{}, nil
 }
 
-func (c *testExternal) Delete(ctx context.Context, mg resource.Managed) error {
+func (c *testExternal) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.Site)
 	if !ok {
-		return errors.New(errNotSite)
+		return managed.ExternalDelete{}, errors.New(errNotSite)
 	}
 
 	cr.SetConditions(xpv1.Deleting())
 
 	err := c.service.DeleteSite(meta.GetExternalName(cr))
 	if err != nil && !clients.IsNotFound(err) {
-		return errors.Wrap(err, "failed to delete site")
+		return managed.ExternalDelete{}, errors.Wrap(err, "failed to delete site")
 	}
 
+	return managed.ExternalDelete{}, nil
+}
+
+func (c *testExternal) Disconnect(ctx context.Context) error {
 	return nil
 }
 
@@ -714,7 +718,7 @@ func TestDelete(t *testing.T) {
 			meta.SetExternalName(tc.args.cr, tc.args.cr.Spec.ForProvider.Domain)
 			
 			e := &testExternal{service: tc.args.service}
-			err := e.Delete(context.Background(), tc.args.cr)
+			_, err := e.Delete(context.Background(), tc.args.cr)
 
 			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {
 				t.Errorf("Delete(): -want error, +got error:\n%s", diff)
