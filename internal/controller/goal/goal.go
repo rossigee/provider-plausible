@@ -36,6 +36,7 @@ import (
 	sitev1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
 	"github.com/rossigee/provider-plausible/apis/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
+	"github.com/rossigee/provider-plausible/internal/features"
 )
 
 const (
@@ -53,10 +54,9 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := managed.ControllerName(goalv1alpha1.GoalGroupKind)
 
 	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
-	// TODO: Add support for alpha management policies
-	// if o.Features.Enabled(features.EnableAlphaManagementPolicies) {
-	// 	cps = append(cps, connection.NewDetailsManager(mgr.GetClient(), v1beta1.ProviderConfigUsageGroupVersionKind))
-	// }
+	if o.Features.Enabled(features.EnableAlphaManagementPolicies) {
+		cps = append(cps, managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme()))
+	}
 
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(goalv1alpha1.GoalGroupVersionKind),

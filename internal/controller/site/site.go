@@ -34,6 +34,7 @@ import (
 	sitev1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
 	"github.com/rossigee/provider-plausible/apis/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
+	"github.com/rossigee/provider-plausible/internal/features"
 )
 
 const (
@@ -49,10 +50,9 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := managed.ControllerName(sitev1alpha1.SiteGroupKind)
 
 	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
-	// TODO: Add support for alpha management policies
-	// if o.Features.Enabled(features.EnableAlphaManagementPolicies) {
-	// 	cps = append(cps, connection.NewDetailsManager(mgr.GetClient(), v1beta1.ProviderConfigUsageGroupVersionKind))
-	// }
+	if o.Features.Enabled(features.EnableAlphaManagementPolicies) {
+		cps = append(cps, managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme()))
+	}
 
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(sitev1alpha1.SiteGroupVersionKind),
@@ -136,6 +136,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		}
 
 		cr.SetConditions(xpv1.Available())
+		cr.SetConditions(xpv1.ReconcileSuccess())
 
 		return managed.ExternalObservation{
 			ResourceExists:   true,
@@ -165,6 +166,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}
 
 	cr.SetConditions(xpv1.Available())
+	cr.SetConditions(xpv1.ReconcileSuccess())
 
 	return managed.ExternalObservation{
 		ResourceExists:   true,
@@ -209,7 +211,13 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 
 	meta.SetExternalName(cr, site.ID)
 
-	return managed.ExternalCreation{}, nil
+	// Return connection details for the created site
+	return managed.ExternalCreation{
+		ConnectionDetails: managed.ConnectionDetails{
+			"siteId": []byte(site.ID),
+			"domain": []byte(site.Domain),
+		},
+	}, nil
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
