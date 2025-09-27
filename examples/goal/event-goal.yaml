@@ -1,6 +1,7 @@
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
+  namespace: default
   name: example-event-goal
 spec:
   forProvider:

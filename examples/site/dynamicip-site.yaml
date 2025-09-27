@@ -1,6 +1,7 @@
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
+  namespace: default
   name: dynamicip-site
 spec:
   forProvider:

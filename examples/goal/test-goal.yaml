@@ -1,7 +1,8 @@
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: newsletter-signup
+  namespace: default
 spec:
   forProvider:
     siteDomain: debs.golder.tech

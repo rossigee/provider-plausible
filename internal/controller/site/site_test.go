@@ -25,13 +25,13 @@ import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/crossplane/crossplane-runtime/pkg/meta"
-	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
-	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	"github.com/crossplane/crossplane-runtime/pkg/test"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/test"
 
-	v1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
+	v1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
 )
 
@@ -50,7 +50,7 @@ type testExternal struct {
 }
 
 func (c *testExternal) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*v1alpha1.Site)
+	cr, ok := mg.(*v1beta1.Site)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotSite)
 	}
@@ -68,7 +68,7 @@ func (c *testExternal) Observe(ctx context.Context, mg resource.Managed) (manage
 			}, nil
 		}
 
-		cr.Status.AtProvider = v1alpha1.SiteObservation{
+		cr.Status.AtProvider = v1beta1.SiteObservation{
 			ID:     site.ID,
 			Domain: site.Domain,
 			TeamID: site.TeamID,
@@ -97,7 +97,7 @@ func (c *testExternal) Observe(ctx context.Context, mg resource.Managed) (manage
 	// Set the external name to the site ID
 	meta.SetExternalName(cr, site.ID)
 
-	cr.Status.AtProvider = v1alpha1.SiteObservation{
+	cr.Status.AtProvider = v1beta1.SiteObservation{
 		ID:     site.ID,
 		Domain: site.Domain,
 		TeamID: site.TeamID,
@@ -111,7 +111,7 @@ func (c *testExternal) Observe(ctx context.Context, mg resource.Managed) (manage
 	}, nil
 }
 
-func (c *testExternal) isUpToDate(cr *v1alpha1.Site, site *clients.Site) bool {
+func (c *testExternal) isUpToDate(cr *v1beta1.Site, site *clients.Site) bool {
 	// Check if domain needs to be updated
 	if cr.Spec.ForProvider.NewDomain != nil && *cr.Spec.ForProvider.NewDomain != site.Domain {
 		return false
@@ -122,7 +122,7 @@ func (c *testExternal) isUpToDate(cr *v1alpha1.Site, site *clients.Site) bool {
 }
 
 func (c *testExternal) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.Site)
+	cr, ok := mg.(*v1beta1.Site)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotSite)
 	}
@@ -152,7 +152,7 @@ func (c *testExternal) Create(ctx context.Context, mg resource.Managed) (managed
 }
 
 func (c *testExternal) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.Site)
+	cr, ok := mg.(*v1beta1.Site)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotSite)
 	}
@@ -169,7 +169,7 @@ func (c *testExternal) Update(ctx context.Context, mg resource.Managed) (managed
 }
 
 func (c *testExternal) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
-	cr, ok := mg.(*v1alpha1.Site)
+	cr, ok := mg.(*v1beta1.Site)
 	if !ok {
 		return managed.ExternalDelete{}, errors.New(errNotSite)
 	}
@@ -224,10 +224,10 @@ func (m *MockPlausibleClient) ListSites() ([]clients.Site, error) {
 func TestObserve(t *testing.T) {
 	type args struct {
 		service PlausibleService
-		cr      *v1alpha1.Site
+		cr      *v1beta1.Site
 	}
 	type want struct {
-		cr          *v1alpha1.Site
+		cr          *v1beta1.Site
 		observation managed.ExternalObservation
 		err         error
 	}
@@ -250,9 +250,9 @@ func TestObserve(t *testing.T) {
 						}, nil
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:   "example.com",
 							Timezone: ptr("UTC"),
 						},
@@ -260,25 +260,25 @@ func TestObserve(t *testing.T) {
 				},
 			},
 			want: want{
-				cr: &v1alpha1.Site{
+				cr: &v1beta1.Site{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
 							"crossplane.io/external-name": "example.com",
 						},
 					},
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:   "example.com",
 							Timezone: ptr("UTC"),
 						},
 					},
-					Status: v1alpha1.SiteStatus{
+					Status: v1beta1.SiteStatus{
 						ResourceStatus: xpv1.ResourceStatus{
 							ConditionedStatus: xpv1.ConditionedStatus{
 								Conditions: []xpv1.Condition{xpv1.Available()},
 							},
 						},
-						AtProvider: v1alpha1.SiteObservation{
+						AtProvider: v1beta1.SiteObservation{
 							ID:     "example.com",
 							Domain: "example.com",
 						},
@@ -297,9 +297,9 @@ func TestObserve(t *testing.T) {
 						return nil, nil
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:   "nonexistent.com",
 							Timezone: ptr("UTC"),
 						},
@@ -307,9 +307,9 @@ func TestObserve(t *testing.T) {
 				},
 			},
 			want: want{
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:   "nonexistent.com",
 							Timezone: ptr("UTC"),
 						},
@@ -332,9 +332,9 @@ func TestObserve(t *testing.T) {
 						}, nil
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:   "example.com",
 							Timezone: ptr("Asia/Bangkok"), // Different timezone
 						},
@@ -342,25 +342,25 @@ func TestObserve(t *testing.T) {
 				},
 			},
 			want: want{
-				cr: &v1alpha1.Site{
+				cr: &v1beta1.Site{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
 							"crossplane.io/external-name": "example.com",
 						},
 					},
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:   "example.com",
 							Timezone: ptr("Asia/Bangkok"),
 						},
 					},
-					Status: v1alpha1.SiteStatus{
+					Status: v1beta1.SiteStatus{
 						ResourceStatus: xpv1.ResourceStatus{
 							ConditionedStatus: xpv1.ConditionedStatus{
 								Conditions: []xpv1.Condition{xpv1.Available()},
 							},
 						},
-						AtProvider: v1alpha1.SiteObservation{
+						AtProvider: v1beta1.SiteObservation{
 							ID:     "example.com",
 							Domain: "example.com",
 						},
@@ -395,10 +395,10 @@ func TestObserve(t *testing.T) {
 func TestCreate(t *testing.T) {
 	type args struct {
 		service PlausibleService
-		cr      *v1alpha1.Site
+		cr      *v1beta1.Site
 	}
 	type want struct {
-		cr      *v1alpha1.Site
+		cr      *v1beta1.Site
 		created managed.ExternalCreation
 		err     error
 	}
@@ -420,9 +420,9 @@ func TestCreate(t *testing.T) {
 						}, nil
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:   "new.example.com",
 							Timezone: ptr("UTC"),
 						},
@@ -430,19 +430,19 @@ func TestCreate(t *testing.T) {
 				},
 			},
 			want: want{
-				cr: &v1alpha1.Site{
+				cr: &v1beta1.Site{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
 							"crossplane.io/external-name": "",
 						},
 					},
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:   "new.example.com",
 							Timezone: ptr("UTC"),
 						},
 					},
-					Status: v1alpha1.SiteStatus{
+					Status: v1beta1.SiteStatus{
 						ResourceStatus: xpv1.ResourceStatus{
 							ConditionedStatus: xpv1.ConditionedStatus{
 								Conditions: []xpv1.Condition{xpv1.Creating()},
@@ -460,22 +460,22 @@ func TestCreate(t *testing.T) {
 						return nil, errors.New("API error")
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain: "fail.example.com",
 						},
 					},
 				},
 			},
 			want: want{
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain: "fail.example.com",
 						},
 					},
-					Status: v1alpha1.SiteStatus{
+					Status: v1beta1.SiteStatus{
 						ResourceStatus: xpv1.ResourceStatus{
 							ConditionedStatus: xpv1.ConditionedStatus{
 								Conditions: []xpv1.Condition{xpv1.Creating()},
@@ -509,10 +509,10 @@ func TestCreate(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	type args struct {
 		service PlausibleService
-		cr      *v1alpha1.Site
+		cr      *v1beta1.Site
 	}
 	type want struct {
-		cr      *v1alpha1.Site
+		cr      *v1beta1.Site
 		updated managed.ExternalUpdate
 		err     error
 	}
@@ -538,35 +538,35 @@ func TestUpdate(t *testing.T) {
 						}, nil
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:    "example.com",
 							NewDomain: ptr("new.example.com"),
 						},
 					},
-					Status: v1alpha1.SiteStatus{
-						AtProvider: v1alpha1.SiteObservation{
+					Status: v1beta1.SiteStatus{
+						AtProvider: v1beta1.SiteObservation{
 							Domain: "example.com",
 						},
 					},
 				},
 			},
 			want: want{
-				cr: &v1alpha1.Site{
+				cr: &v1beta1.Site{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
 							"crossplane.io/external-name": "example.com",
 						},
 					},
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:    "example.com",
 							NewDomain: ptr("new.example.com"),
 						},
 					},
-					Status: v1alpha1.SiteStatus{
-						AtProvider: v1alpha1.SiteObservation{
+					Status: v1beta1.SiteStatus{
+						AtProvider: v1beta1.SiteObservation{
 							Domain: "example.com",
 						},
 					},
@@ -588,9 +588,9 @@ func TestUpdate(t *testing.T) {
 						}, nil
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:    "old.example.com",
 							NewDomain: ptr("new.example.com"),
 						},
@@ -598,14 +598,14 @@ func TestUpdate(t *testing.T) {
 				},
 			},
 			want: want{
-				cr: &v1alpha1.Site{
+				cr: &v1beta1.Site{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
 							"crossplane.io/external-name": "old.example.com",
 						},
 					},
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain:    "old.example.com", // Should remain unchanged
 							NewDomain: ptr("new.example.com"), // Should remain unchanged
 						},
@@ -640,7 +640,7 @@ func TestUpdate(t *testing.T) {
 func TestDelete(t *testing.T) {
 	type args struct {
 		service PlausibleService
-		cr      *v1alpha1.Site
+		cr      *v1beta1.Site
 	}
 	type want struct {
 		err error
@@ -660,9 +660,9 @@ func TestDelete(t *testing.T) {
 						return nil
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain: "example.com",
 						},
 					},
@@ -679,9 +679,9 @@ func TestDelete(t *testing.T) {
 						return errors.New("API error")
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain: "example.com",
 						},
 					},
@@ -698,9 +698,9 @@ func TestDelete(t *testing.T) {
 						return fmt.Errorf("API request failed with status 404: Not Found")
 					},
 				},
-				cr: &v1alpha1.Site{
-					Spec: v1alpha1.SiteSpec{
-						ForProvider: v1alpha1.SiteParameters{
+				cr: &v1beta1.Site{
+					Spec: v1beta1.SiteSpec{
+						ForProvider: v1beta1.SiteParameters{
 							Domain: "example.com",
 						},
 					},

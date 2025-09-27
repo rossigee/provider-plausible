@@ -24,19 +24,17 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/crossplane/crossplane-runtime/pkg/controller"
-	"github.com/crossplane/crossplane-runtime/pkg/event"
-	"github.com/crossplane/crossplane-runtime/pkg/meta"
-	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
-	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
-	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/event"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 
-	goalv1alpha1 "github.com/rossigee/provider-plausible/apis/goal/v1alpha1"
-	sitev1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
-	"github.com/rossigee/provider-plausible/apis/v1beta1"
+	goalv1beta1 "github.com/rossigee/provider-plausible/apis/goal/v1beta1"
+	sitev1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
-	"github.com/rossigee/provider-plausible/internal/features"
 )
 
 const (
@@ -51,31 +49,26 @@ const (
 
 // Setup adds a controller that reconciles Goal managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	name := managed.ControllerName(goalv1alpha1.GoalGroupKind)
+	name := managed.ControllerName(goalv1beta1.GoalGroupKind)
 
-	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
-	if o.Features.Enabled(features.EnableAlphaManagementPolicies) {
-		cps = append(cps, managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme()))
-	}
 
 	r := managed.NewReconciler(mgr,
-		resource.ManagedKind(goalv1alpha1.GoalGroupVersionKind),
+		resource.ManagedKind(goalv1beta1.GoalGroupVersionKind),
 		managed.WithExternalConnecter(&connector{
 			kube:         mgr.GetClient(),
-			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &v1beta1.ProviderConfigUsage{}),
+			usage:        clients.NewProviderConfigUsageTracker(mgr.GetClient()),
 			newServiceFn: clients.NewClient,
 		}),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
-		managed.WithConnectionPublishers(cps...),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())))
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
 		WithEventFilter(resource.DesiredStateChanged()).
-		For(&goalv1alpha1.Goal{}).
+		For(&goalv1beta1.Goal{}).
 		Complete(ratelimiter.NewReconciler(name, r, o.GlobalRateLimiter))
 }
 
@@ -93,7 +86,7 @@ type connector struct {
 // 3. Getting the credentials specified by the ProviderConfig.
 // 4. Using the credentials to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	_, ok := mg.(*goalv1alpha1.Goal)
+	_, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return nil, errors.New(errNotGoal)
 	}
@@ -115,7 +108,7 @@ type external struct {
 	kube    client.Client
 }
 
-func (c *external) getSiteDomain(ctx context.Context, cr *goalv1alpha1.Goal) (string, error) {
+func (c *external) getSiteDomain(ctx context.Context, cr *goalv1beta1.Goal) (string, error) {
 	// If direct domain is specified, use it
 	if cr.Spec.ForProvider.SiteDomain != nil && *cr.Spec.ForProvider.SiteDomain != "" {
 		return *cr.Spec.ForProvider.SiteDomain, nil
@@ -123,7 +116,7 @@ func (c *external) getSiteDomain(ctx context.Context, cr *goalv1alpha1.Goal) (st
 
 	// If reference is specified, resolve it
 	if cr.Spec.ForProvider.SiteDomainRef != nil {
-		site := &sitev1alpha1.Site{}
+		site := &sitev1beta1.Site{}
 		nn := types.NamespacedName{
 			Name: cr.Spec.ForProvider.SiteDomainRef.Name,
 		}
@@ -142,7 +135,7 @@ func (c *external) getSiteDomain(ctx context.Context, cr *goalv1alpha1.Goal) (st
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*goalv1alpha1.Goal)
+	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotGoal)
 	}
@@ -165,7 +158,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 			}, nil
 		}
 
-		cr.Status.AtProvider = goalv1alpha1.GoalObservation{
+		cr.Status.AtProvider = goalv1beta1.GoalObservation{
 			ID:        goal.ID,
 			GoalType:  goal.GoalType,
 			EventName: goal.EventName,
@@ -190,7 +183,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		if c.goalMatches(cr, &goal) {
 			meta.SetExternalName(cr, goal.ID)
 
-			cr.Status.AtProvider = goalv1alpha1.GoalObservation{
+			cr.Status.AtProvider = goalv1beta1.GoalObservation{
 				ID:        goal.ID,
 				GoalType:  goal.GoalType,
 				EventName: goal.EventName,
@@ -211,7 +204,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}, nil
 }
 
-func (c *external) goalMatches(cr *goalv1alpha1.Goal, goal *clients.Goal) bool {
+func (c *external) goalMatches(cr *goalv1beta1.Goal, goal *clients.Goal) bool {
 	if cr.Spec.ForProvider.GoalType != goal.GoalType {
 		return false
 	}
@@ -227,7 +220,7 @@ func (c *external) goalMatches(cr *goalv1alpha1.Goal, goal *clients.Goal) bool {
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*goalv1alpha1.Goal)
+	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotGoal)
 	}
@@ -272,7 +265,7 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
-	cr, ok := mg.(*goalv1alpha1.Goal)
+	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return managed.ExternalDelete{}, errors.New(errNotGoal)
 	}

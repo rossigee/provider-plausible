@@ -27,8 +27,10 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/rossigee/provider-plausible/apis/v1beta1"
@@ -76,11 +78,27 @@ func NewClient(cfg Config) *Client {
 // GetConfig extracts the Plausible client configuration from a ProviderConfig
 func GetConfig(ctx context.Context, c client.Client, mg resource.Managed) (*Config, error) {
 	pc := &v1beta1.ProviderConfig{}
-	if err := c.Get(ctx, client.ObjectKey{Name: mg.GetProviderConfigReference().Name}, pc); err != nil {
+
+	// Extract provider config reference using interface conversion
+	type providerConfigReferencer interface {
+		GetProviderConfigReference() *xpv1.Reference
+	}
+
+	pcr, ok := mg.(providerConfigReferencer)
+	if !ok {
+		return nil, errors.New("managed resource does not implement GetProviderConfigReference")
+	}
+
+	pcRef := pcr.GetProviderConfigReference()
+	if pcRef == nil {
+		return nil, errors.New(errNoProviderConfig)
+	}
+
+	if err := c.Get(ctx, client.ObjectKey{Name: pcRef.Name}, pc); err != nil {
 		return nil, errors.Wrap(err, errGetProviderConfig)
 	}
 
-	t := resource.NewProviderConfigUsageTracker(c, &v1beta1.ProviderConfigUsage{})
+	t := NewProviderConfigUsageTracker(c)
 	if err := t.Track(ctx, mg); err != nil {
 		return nil, errors.Wrap(err, errTrackUsage)
 	}
@@ -411,4 +429,37 @@ func (c *Client) DeleteGoal(goalID string) error {
 // IsNotFound returns true if the error indicates the resource was not found
 func IsNotFound(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "status 404")
+}
+
+// Custom ProviderConfigUsage tracker implementation that works with fake clients
+type providerConfigUsageTracker struct {
+	kube client.Client
+}
+
+// NewProviderConfigUsageTracker creates a ProviderConfigUsage tracker that works with fake clients
+func NewProviderConfigUsageTracker(kube client.Client) resource.Tracker {
+	return &providerConfigUsageTracker{kube: kube}
+}
+
+func (t *providerConfigUsageTracker) Track(ctx context.Context, mg resource.Managed) error {
+	pcu := &v1beta1.ProviderConfigUsage{}
+	pcu.SetName(string(mg.GetUID()))
+
+	// Handle namespace - use mg namespace or fallback to crossplane-system
+	namespace := mg.GetNamespace()
+	if namespace == "" {
+		namespace = "crossplane-system"
+	}
+	pcu.SetNamespace(namespace)
+
+	// Set OwnerReferences to create connection
+	pcu.SetOwnerReferences([]metav1.OwnerReference{{
+		APIVersion: mg.GetObjectKind().GroupVersionKind().GroupVersion().String(),
+		Kind:       mg.GetObjectKind().GroupVersionKind().Kind,
+		Name:       mg.GetName(),
+		UID:        mg.GetUID(),
+	}})
+
+	// Use CreateOrUpdate for idempotent operation
+	return errors.Wrap(client.IgnoreAlreadyExists(t.kube.Create(ctx, pcu)), "cannot create ProviderConfigUsage")
 }

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1beta1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -23,8 +23,8 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "goal.plausible.crossplane.io"
-	Version = "v1alpha1"
+	Group   = "site.plausible.m.crossplane.io"
+	Version = "v1beta1"
 )
 
 var (
@@ -39,5 +39,5 @@ var (
 )
 
 func init() {
-	SchemeBuilder.Register(&Goal{}, &GoalList{})
+	SchemeBuilder.Register(&Site{}, &SiteList{})
 }

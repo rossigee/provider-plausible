@@ -1,6 +1,6 @@
-# Plausible Provider Resources
+# Plausible Provider Resources (v2 Native)
 
-This document provides detailed information about all resources supported by the Plausible provider.
+This document provides detailed information about all resources supported by the Plausible v2 native provider.
 
 ## Table of Contents
 - [Site Resource](#site-resource)
@@ -13,17 +13,19 @@ This document provides detailed information about all resources supported by the
 The `Site` resource represents a website in Plausible Analytics.
 
 ### API Version
-- Group: `site.plausible.crossplane.io`
-- Version: `v1alpha1`
+- Group: `site.plausible.m.crossplane.io`
+- Version: `v1beta1`
 - Kind: `Site`
+- Scope: `Namespaced`
 
 ### Specification
 
 ```yaml
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: my-website
+  namespace: production
 spec:
   forProvider:
     # Required: The domain name for the site
@@ -77,10 +79,11 @@ status:
 
 #### Basic Site
 ```yaml
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: company-blog
+  namespace: production
 spec:
   forProvider:
     domain: blog.company.com
@@ -90,7 +93,7 @@ spec:
 
 #### Site with Team and Timezone
 ```yaml
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: regional-site
@@ -105,7 +108,7 @@ spec:
 
 #### Updating a Site Domain
 ```yaml
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: company-site
@@ -129,17 +132,19 @@ spec:
 The `Goal` resource represents a conversion goal in Plausible Analytics.
 
 ### API Version
-- Group: `goal.plausible.crossplane.io`
-- Version: `v1alpha1`
+- Group: `goal.plausible.m.crossplane.io`
+- Version: `v1beta1`
 - Kind: `Goal`
+- Scope: `Namespaced`
 
 ### Specification
 
 ```yaml
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: my-goal
+  namespace: production
 spec:
   forProvider:
     # Site association (use one of the following methods)
@@ -200,10 +205,11 @@ status:
 
 #### Event Goal
 ```yaml
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: signup-goal
+  namespace: production
 spec:
   forProvider:
     siteDomainRef:
@@ -216,7 +222,7 @@ spec:
 
 #### Page Goal
 ```yaml
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: conversion-goal
@@ -232,7 +238,7 @@ spec:
 #### Multiple Goals for One Site
 ```yaml
 # Newsletter signup
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: newsletter-goal
@@ -246,7 +252,7 @@ spec:
     name: default
 ---
 # Contact form submission
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: contact-goal
@@ -260,7 +266,7 @@ spec:
     name: default
 ---
 # Thank you page visit
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: thankyou-goal
@@ -316,7 +322,7 @@ Using resource references is recommended as it:
 
 ```yaml
 # 1. Create the site
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: ecommerce-site
@@ -331,7 +337,7 @@ spec:
     name: default
 ---
 # 2. Create conversion goals
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: ecommerce-purchase
@@ -347,7 +353,7 @@ spec:
   providerConfigRef:
     name: default
 ---
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: ecommerce-add-to-cart
@@ -368,7 +374,7 @@ spec:
 
 ```yaml
 # Development site
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: app-dev
@@ -381,7 +387,7 @@ spec:
     name: default
 ---
 # Production site
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: app-prod
@@ -395,7 +401,7 @@ spec:
     name: default
 ---
 # Shared goal configuration for both environments
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: signup-goal-dev
@@ -408,7 +414,7 @@ spec:
   providerConfigRef:
     name: default
 ---
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: signup-goal-prod

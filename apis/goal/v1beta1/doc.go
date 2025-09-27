@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha1 contains managed resources for Plausible goals.
+// Package v1beta1 contains managed resources for Plausible goals (v2 native).
 // +kubebuilder:object:generate=true
-// +groupName=goal.plausible.crossplane.io
-// +versionName=v1alpha1
-package v1alpha1
+// +groupName=goal.plausible.m.crossplane.io
+// +versionName=v1beta1
+package v1beta1

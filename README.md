@@ -1,15 +1,15 @@
-# Crossplane Provider for Plausible Analytics
+# Crossplane Provider for Plausible Analytics (v2 Native)
 
-**✅ BUILD STATUS: WORKING** - Successfully builds after CLI compatibility fixes (v1.1.0)
+**✅ BUILD STATUS: WORKING** - v2 native provider with namespaced resources (v1.2.0)
 
 [![Build Status](https://github.com/crossplane-contrib/provider-plausible/workflows/CI/badge.svg)](https://github.com/crossplane-contrib/provider-plausible/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/crossplane-contrib/provider-plausible)](https://goreportcard.com/report/github.com/crossplane-contrib/provider-plausible)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A [Crossplane](https://crossplane.io/) provider for managing [Plausible Analytics](https://plausible.io/) resources programmatically through Kubernetes.
+A [Crossplane v2 native](https://crossplane.io/) provider for managing [Plausible Analytics](https://plausible.io/) resources programmatically through Kubernetes with namespace isolation.
 
 ## Container Registry
-- **Primary**: `ghcr.io/rossigee/provider-plausible:v1.1.0`
+- **Primary**: `ghcr.io/rossigee/provider-plausible:v1.2.0`
 - **Harbor**: Available via environment configuration
 - **Upbound**: Available via environment configuration
 
@@ -23,15 +23,16 @@ The Plausible provider enables platform teams to manage Plausible Analytics site
 
 ## Features
 
+- **🚀 v2 Native**: Namespaced resources for better multi-tenancy and isolation
 - **Site Management**: Create, update, and delete Plausible sites
 - **Goal Tracking**: Manage conversion goals with event and page-based tracking
-- **Multi-tenant**: Support for team-based site management
+- **Multi-tenant**: Support for team-based site management with namespace isolation
 - **Cross-references**: Reference sites from goals using Kubernetes selectors
 - **Observability**: Built-in status reporting and condition management
 
 ## Prerequisites
 
-- Kubernetes cluster with Crossplane installed
+- Kubernetes cluster with Crossplane v1.20+ installed
 - Plausible Analytics account with Sites API access
 - API key with `sites:provision:*` scope
 
@@ -40,7 +41,7 @@ The Plausible provider enables platform teams to manage Plausible Analytics site
 ### Quick Start
 
 ```bash
-kubectl crossplane install provider ghcr.io/rossigee/provider-plausible:v1.1.0
+kubectl crossplane install provider ghcr.io/rossigee/provider-plausible:v1.2.0
 ```
 
 ### Declarative Installation
@@ -51,7 +52,7 @@ kind: Provider
 metadata:
   name: provider-plausible
 spec:
-  package: ghcr.io/rossigee/provider-plausible:v1.1.0
+  package: ghcr.io/rossigee/provider-plausible:v1.2.0
 ```
 
 ## Configuration
@@ -88,10 +89,11 @@ spec:
 ### Basic Site Creation
 
 ```yaml
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: company-website
+  namespace: production
 spec:
   forProvider:
     domain: company.example.com
@@ -103,10 +105,11 @@ spec:
 ### Site with Team Assignment
 
 ```yaml
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: team-site
+  namespace: team-marketing
 spec:
   forProvider:
     domain: team.example.com
@@ -119,10 +122,11 @@ spec:
 ### Updating Site Domain
 
 ```yaml
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: rebranded-site
+  namespace: production
 spec:
   forProvider:
     domain: old-domain.com
@@ -135,10 +139,11 @@ spec:
 ### Event Goal Creation
 
 ```yaml
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: signup-conversion
+  namespace: production
 spec:
   forProvider:
     siteDomainRef:
@@ -152,10 +157,11 @@ spec:
 ### Page Goal Creation
 
 ```yaml
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: thank-you-page
+  namespace: production
 spec:
   forProvider:
     siteDomainRef:
@@ -170,10 +176,11 @@ spec:
 
 ```yaml
 # Create multiple sites and goals that reference them
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: marketing-site
+  namespace: marketing
   labels:
     team: marketing
 spec:
@@ -181,10 +188,11 @@ spec:
     domain: marketing.example.com
     timezone: "America/Los_Angeles"
 ---
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: marketing-signup
+  namespace: marketing
 spec:
   forProvider:
     siteDomainRef:
@@ -192,10 +200,11 @@ spec:
     goalType: event
     eventName: "Newsletter Signup"
 ---
-apiVersion: goal.plausible.crossplane.io/v1alpha1
+apiVersion: goal.plausible.m.crossplane.io/v1beta1
 kind: Goal
 metadata:
   name: marketing-download
+  namespace: marketing
 spec:
   forProvider:
     siteDomainRef:
@@ -322,7 +331,7 @@ kind: Provider
 metadata:
   name: provider-plausible
 spec:
-  package: ghcr.io/rossigee/provider-plausible:v1.1.0
+  package: ghcr.io/rossigee/provider-plausible:v1.2.0
   runtimeConfigRef:
     name: debug-config
 ---

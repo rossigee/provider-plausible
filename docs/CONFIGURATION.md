@@ -12,7 +12,7 @@ This guide walks through all configuration options for the Plausible provider.
 
 ## Prerequisites
 
-1. A Kubernetes cluster with Crossplane installed
+1. A Kubernetes cluster with Crossplane v1.20+ installed
 2. A Plausible Analytics account (either cloud or self-hosted)
 3. A Plausible API key with appropriate permissions
 

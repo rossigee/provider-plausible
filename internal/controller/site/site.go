@@ -23,18 +23,16 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/crossplane/crossplane-runtime/pkg/controller"
-	"github.com/crossplane/crossplane-runtime/pkg/event"
-	"github.com/crossplane/crossplane-runtime/pkg/meta"
-	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
-	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
-	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/event"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 
-	sitev1alpha1 "github.com/rossigee/provider-plausible/apis/site/v1alpha1"
-	"github.com/rossigee/provider-plausible/apis/v1beta1"
+	sitev1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
-	"github.com/rossigee/provider-plausible/internal/features"
 )
 
 const (
@@ -47,30 +45,26 @@ const (
 
 // Setup adds a controller that reconciles Site managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	name := managed.ControllerName(sitev1alpha1.SiteGroupKind)
+	name := managed.ControllerName(sitev1beta1.SiteGroupKind)
 
-	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
-	if o.Features.Enabled(features.EnableAlphaManagementPolicies) {
-		cps = append(cps, managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme()))
-	}
 
 	r := managed.NewReconciler(mgr,
-		resource.ManagedKind(sitev1alpha1.SiteGroupVersionKind),
+		resource.ManagedKind(sitev1beta1.SiteGroupVersionKind),
 		managed.WithExternalConnecter(&connector{
 			kube:         mgr.GetClient(),
-			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &v1beta1.ProviderConfigUsage{}),
+			usage:        clients.NewProviderConfigUsageTracker(mgr.GetClient()),
 			newServiceFn: clients.NewClient,
 		}),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
-		managed.WithConnectionPublishers(cps...))
+		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())))
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
 		WithEventFilter(resource.DesiredStateChanged()).
-		For(&sitev1alpha1.Site{}).
+		For(&sitev1beta1.Site{}).
 		Complete(ratelimiter.NewReconciler(name, r, o.GlobalRateLimiter))
 }
 
@@ -88,7 +82,7 @@ type connector struct {
 // 3. Getting the credentials specified by the ProviderConfig.
 // 4. Using the credentials to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	_, ok := mg.(*sitev1alpha1.Site)
+	_, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return nil, errors.New(errNotSite)
 	}
@@ -111,7 +105,7 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*sitev1alpha1.Site)
+	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotSite)
 	}
@@ -129,7 +123,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 			}, nil
 		}
 
-		cr.Status.AtProvider = sitev1alpha1.SiteObservation{
+		cr.Status.AtProvider = sitev1beta1.SiteObservation{
 			ID:     site.ID,
 			Domain: site.Domain,
 			TeamID: site.TeamID,
@@ -159,7 +153,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	// Set the external name to the site ID
 	meta.SetExternalName(cr, site.ID)
 
-	cr.Status.AtProvider = sitev1alpha1.SiteObservation{
+	cr.Status.AtProvider = sitev1beta1.SiteObservation{
 		ID:     site.ID,
 		Domain: site.Domain,
 		TeamID: site.TeamID,
@@ -174,7 +168,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}, nil
 }
 
-func (c *external) isUpToDate(cr *sitev1alpha1.Site, site *clients.Site) bool {
+func (c *external) isUpToDate(cr *sitev1beta1.Site, site *clients.Site) bool {
 	// Check if domain needs to be updated
 	if cr.Spec.ForProvider.NewDomain != nil && *cr.Spec.ForProvider.NewDomain != site.Domain {
 		return false
@@ -185,7 +179,7 @@ func (c *external) isUpToDate(cr *sitev1alpha1.Site, site *clients.Site) bool {
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*sitev1alpha1.Site)
+	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotSite)
 	}
@@ -221,7 +215,7 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*sitev1alpha1.Site)
+	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotSite)
 	}
@@ -238,7 +232,7 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
-	cr, ok := mg.(*sitev1alpha1.Site)
+	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalDelete{}, errors.New(errNotSite)
 	}

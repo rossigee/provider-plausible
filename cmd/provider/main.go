@@ -19,6 +19,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -26,14 +27,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
-	"github.com/crossplane/crossplane-runtime/pkg/feature"
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
-	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
+	xpcontroller "github.com/crossplane/crossplane-runtime/v2/pkg/controller"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/feature"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
 
 	"github.com/rossigee/provider-plausible/apis"
 	"github.com/rossigee/provider-plausible/internal/controller"
 	"github.com/rossigee/provider-plausible/internal/features"
+	"github.com/rossigee/provider-plausible/internal/version"
 )
 
 func main() {
@@ -59,7 +61,24 @@ func main() {
 		ctrl.SetLogger(zl)
 	}
 
-	log.Debug("Starting", "sync-period", syncPeriod.String())
+	// Log startup information with build and configuration details
+	log.Info("Provider starting up",
+		"provider", "provider-plausible",
+		"version", version.Version,
+		"go-version", runtime.Version(),
+		"platform", runtime.GOOS+"/"+runtime.GOARCH,
+		"sync-period", syncPeriod.String(),
+		"poll-interval", pollInterval.String(),
+		"max-reconcile-rate", *maxReconcileRate,
+		"leader-election", *leaderElection,
+		"leader-election-namespace", *leaderElectionNS,
+		"management-policies", *enableManagementPolicies,
+		"debug-mode", *debug)
+
+	log.Debug("Detailed startup configuration",
+		"sync-period", syncPeriod.String(),
+		"poll-interval", pollInterval.String(),
+		"max-reconcile-rate", *maxReconcileRate)
 
 	cfg, err := ctrl.GetConfig()
 	if err != nil {
