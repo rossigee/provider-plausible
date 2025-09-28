@@ -426,6 +426,372 @@ func (c *Client) DeleteGoal(goalID string) error {
 	return parseResponse(resp, nil)
 }
 
+// SharedLink represents a Plausible shared link
+type SharedLink struct {
+	Name        string `json:"name"`
+	URL         string `json:"url"`
+	HasPassword bool   `json:"has_password"`
+}
+
+// CreateSharedLinkRequest represents a request to create a shared link
+type CreateSharedLinkRequest struct {
+	SiteDomain string `json:"site_id"`
+	Name       string `json:"name"`
+	Password   string `json:"password,omitempty"`
+}
+
+// CustomProperty represents a Plausible custom property
+type CustomProperty struct {
+	Key         string `json:"key"`
+	Description string `json:"description,omitempty"`
+	IsEnabled   bool   `json:"is_enabled"`
+}
+
+// CreateCustomPropertyRequest represents a request to create a custom property
+type CreateCustomPropertyRequest struct {
+	SiteDomain  string `json:"site_id"`
+	Key         string `json:"key"`
+	Description string `json:"description,omitempty"`
+}
+
+// Guest represents a Plausible site guest
+type Guest struct {
+	Email      string `json:"email"`
+	Role       string `json:"role"`
+	Status     string `json:"status"`
+	InvitedAt  string `json:"invited_at,omitempty"`
+	AcceptedAt string `json:"accepted_at,omitempty"`
+}
+
+// CreateGuestRequest represents a request to invite a guest
+type CreateGuestRequest struct {
+	SiteDomain string `json:"site_id"`
+	Email      string `json:"email"`
+	Role       string `json:"role"`
+}
+
+// Team represents a Plausible team
+type Team struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	APIEnabled bool   `json:"api_enabled"`
+}
+
+// ListTeamsResponse represents the response from listing teams
+type ListTeamsResponse struct {
+	Teams []Team `json:"teams"`
+	Meta  struct {
+		After  string `json:"after,omitempty"`
+		Before string `json:"before,omitempty"`
+		Limit  int    `json:"limit"`
+	} `json:"meta"`
+}
+
+// ListSharedLinksResponse represents the response from listing shared links
+type ListSharedLinksResponse struct {
+	SharedLinks []SharedLink `json:"shared_links"`
+	Meta        struct {
+		After  string `json:"after,omitempty"`
+		Before string `json:"before,omitempty"`
+		Limit  int    `json:"limit"`
+	} `json:"meta"`
+}
+
+// ListCustomPropertiesResponse represents the response from listing custom properties
+type ListCustomPropertiesResponse struct {
+	CustomProperties []CustomProperty `json:"custom_properties"`
+	Meta             struct {
+		After  string `json:"after,omitempty"`
+		Before string `json:"before,omitempty"`
+		Limit  int    `json:"limit"`
+	} `json:"meta"`
+}
+
+// ListGuestsResponse represents the response from listing guests
+type ListGuestsResponse struct {
+	Guests []Guest `json:"guests"`
+	Meta   struct {
+		After  string `json:"after,omitempty"`
+		Before string `json:"before,omitempty"`
+		Limit  int    `json:"limit"`
+	} `json:"meta"`
+}
+
+// ListTeams retrieves all teams accessible to the account
+func (c *Client) ListTeams() ([]Team, error) {
+	var allTeams []Team
+	after := ""
+
+	for {
+		path := "/sites/teams"
+		if after != "" {
+			path = fmt.Sprintf("%s?after=%s", path, url.QueryEscape(after))
+		}
+
+		resp, err := c.doRequest("GET", path, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		var listResp ListTeamsResponse
+		if err := parseResponse(resp, &listResp); err != nil {
+			return nil, err
+		}
+
+		allTeams = append(allTeams, listResp.Teams...)
+
+		if listResp.Meta.After == "" {
+			break
+		}
+		after = listResp.Meta.After
+	}
+
+	return allTeams, nil
+}
+
+// CreateSharedLink creates or finds a shared link
+func (c *Client) CreateSharedLink(req CreateSharedLinkRequest) (*SharedLink, error) {
+	body := map[string]interface{}{
+		"site_id": req.SiteDomain,
+		"name":    req.Name,
+	}
+
+	if req.Password != "" {
+		body["password"] = req.Password
+	}
+
+	resp, err := c.doRequest("PUT", "/sites/shared-links", body)
+	if err != nil {
+		return nil, err
+	}
+
+	var sharedLink SharedLink
+	if err := parseResponse(resp, &sharedLink); err != nil {
+		return nil, err
+	}
+
+	return &sharedLink, nil
+}
+
+// GetSharedLink retrieves a shared link by name
+func (c *Client) GetSharedLink(siteDomain, name string) (*SharedLink, error) {
+	sharedLinks, err := c.ListSharedLinks(siteDomain)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, link := range sharedLinks {
+		if link.Name == name {
+			return &link, nil
+		}
+	}
+
+	return nil, nil
+}
+
+// ListSharedLinks retrieves all shared links for a site
+func (c *Client) ListSharedLinks(siteDomain string) ([]SharedLink, error) {
+	var allLinks []SharedLink
+	after := ""
+
+	for {
+		path := fmt.Sprintf("/sites/shared-links?site_id=%s", url.QueryEscape(siteDomain))
+		if after != "" {
+			path = fmt.Sprintf("%s&after=%s", path, url.QueryEscape(after))
+		}
+
+		resp, err := c.doRequest("GET", path, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		var listResp ListSharedLinksResponse
+		if err := parseResponse(resp, &listResp); err != nil {
+			return nil, err
+		}
+
+		allLinks = append(allLinks, listResp.SharedLinks...)
+
+		if listResp.Meta.After == "" {
+			break
+		}
+		after = listResp.Meta.After
+	}
+
+	return allLinks, nil
+}
+
+// DeleteSharedLink deletes a shared link
+func (c *Client) DeleteSharedLink(siteDomain, name string) error {
+	resp, err := c.doRequest("DELETE", fmt.Sprintf("/sites/shared-links?site_id=%s&name=%s",
+		url.QueryEscape(siteDomain), url.QueryEscape(name)), nil)
+	if err != nil {
+		return err
+	}
+
+	return parseResponse(resp, nil)
+}
+
+// CreateCustomProperty creates a custom property
+func (c *Client) CreateCustomProperty(req CreateCustomPropertyRequest) (*CustomProperty, error) {
+	body := map[string]interface{}{
+		"site_id":     req.SiteDomain,
+		"key":         req.Key,
+		"description": req.Description,
+	}
+
+	resp, err := c.doRequest("PUT", "/sites/custom-props", body)
+	if err != nil {
+		return nil, err
+	}
+
+	var customProperty CustomProperty
+	if err := parseResponse(resp, &customProperty); err != nil {
+		return nil, err
+	}
+
+	return &customProperty, nil
+}
+
+// GetCustomProperty retrieves a custom property by key
+func (c *Client) GetCustomProperty(siteDomain, key string) (*CustomProperty, error) {
+	properties, err := c.ListCustomProperties(siteDomain)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, prop := range properties {
+		if prop.Key == key {
+			return &prop, nil
+		}
+	}
+
+	return nil, nil
+}
+
+// ListCustomProperties retrieves all custom properties for a site
+func (c *Client) ListCustomProperties(siteDomain string) ([]CustomProperty, error) {
+	var allProperties []CustomProperty
+	after := ""
+
+	for {
+		path := fmt.Sprintf("/sites/custom-props?site_id=%s", url.QueryEscape(siteDomain))
+		if after != "" {
+			path = fmt.Sprintf("%s&after=%s", path, url.QueryEscape(after))
+		}
+
+		resp, err := c.doRequest("GET", path, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		var listResp ListCustomPropertiesResponse
+		if err := parseResponse(resp, &listResp); err != nil {
+			return nil, err
+		}
+
+		allProperties = append(allProperties, listResp.CustomProperties...)
+
+		if listResp.Meta.After == "" {
+			break
+		}
+		after = listResp.Meta.After
+	}
+
+	return allProperties, nil
+}
+
+// DeleteCustomProperty deletes a custom property
+func (c *Client) DeleteCustomProperty(siteDomain, key string) error {
+	resp, err := c.doRequest("DELETE", fmt.Sprintf("/sites/custom-props/%s?site_id=%s",
+		url.QueryEscape(key), url.QueryEscape(siteDomain)), nil)
+	if err != nil {
+		return err
+	}
+
+	return parseResponse(resp, nil)
+}
+
+// CreateGuest invites a guest to a site
+func (c *Client) CreateGuest(req CreateGuestRequest) (*Guest, error) {
+	body := map[string]interface{}{
+		"site_id": req.SiteDomain,
+		"email":   req.Email,
+		"role":    req.Role,
+	}
+
+	resp, err := c.doRequest("PUT", "/sites/guests", body)
+	if err != nil {
+		return nil, err
+	}
+
+	var guest Guest
+	if err := parseResponse(resp, &guest); err != nil {
+		return nil, err
+	}
+
+	return &guest, nil
+}
+
+// GetGuest retrieves a guest by email
+func (c *Client) GetGuest(siteDomain, email string) (*Guest, error) {
+	guests, err := c.ListGuests(siteDomain)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, guest := range guests {
+		if guest.Email == email {
+			return &guest, nil
+		}
+	}
+
+	return nil, nil
+}
+
+// ListGuests retrieves all guests for a site
+func (c *Client) ListGuests(siteDomain string) ([]Guest, error) {
+	var allGuests []Guest
+	after := ""
+
+	for {
+		path := fmt.Sprintf("/sites/guests?site_id=%s", url.QueryEscape(siteDomain))
+		if after != "" {
+			path = fmt.Sprintf("%s&after=%s", path, url.QueryEscape(after))
+		}
+
+		resp, err := c.doRequest("GET", path, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		var listResp ListGuestsResponse
+		if err := parseResponse(resp, &listResp); err != nil {
+			return nil, err
+		}
+
+		allGuests = append(allGuests, listResp.Guests...)
+
+		if listResp.Meta.After == "" {
+			break
+		}
+		after = listResp.Meta.After
+	}
+
+	return allGuests, nil
+}
+
+// DeleteGuest removes a guest from a site
+func (c *Client) DeleteGuest(siteDomain, email string) error {
+	resp, err := c.doRequest("DELETE", fmt.Sprintf("/sites/guests/%s?site_id=%s",
+		url.QueryEscape(email), url.QueryEscape(siteDomain)), nil)
+	if err != nil {
+		return err
+	}
+
+	return parseResponse(resp, nil)
+}
+
 // IsNotFound returns true if the error indicates the resource was not found
 func IsNotFound(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "status 404")

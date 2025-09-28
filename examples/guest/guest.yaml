@@ -1,0 +1,14 @@
+apiVersion: guest.plausible.m.crossplane.io/v1beta1
+kind: Guest
+metadata:
+  name: marketing-analyst
+  namespace: default
+spec:
+  forProvider:
+    siteDomainRef:
+      name: company-website
+    email: "analyst@company.com"
+    role: "viewer"
+  providerConfigRef:
+    name: default
+  deletionPolicy: Delete

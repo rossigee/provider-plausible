@@ -1,0 +1,14 @@
+apiVersion: sharedlink.plausible.m.crossplane.io/v1beta1
+kind: SharedLink
+metadata:
+  name: client-dashboard
+  namespace: default
+spec:
+  forProvider:
+    siteDomainRef:
+      name: company-website
+    name: "client-dashboard"
+    password: "secure123"
+  providerConfigRef:
+    name: default
+  deletionPolicy: Delete

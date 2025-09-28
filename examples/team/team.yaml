@@ -1,0 +1,11 @@
+apiVersion: team.plausible.m.crossplane.io/v1beta1
+kind: Team
+metadata:
+  name: marketing-team
+  namespace: default
+spec:
+  forProvider:
+    teamID: "team-123"
+  providerConfigRef:
+    name: default
+  deletionPolicy: Delete

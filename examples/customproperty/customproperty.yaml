@@ -1,0 +1,14 @@
+apiVersion: customproperty.plausible.m.crossplane.io/v1beta1
+kind: CustomProperty
+metadata:
+  name: user-segment
+  namespace: default
+spec:
+  forProvider:
+    siteDomainRef:
+      name: company-website
+    key: "user_segment"
+    description: "Customer segment tracking for marketing analytics"
+  providerConfigRef:
+    name: default
+  deletionPolicy: Delete
