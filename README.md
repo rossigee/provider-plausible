@@ -26,15 +26,43 @@ The Plausible provider enables platform teams to manage Plausible Analytics site
 - **🚀 v2 Native**: Namespaced resources for better multi-tenancy and isolation
 - **Site Management**: Create, update, and delete Plausible sites
 - **Goal Tracking**: Manage conversion goals with event and page-based tracking
+- **Shared Links**: Create and manage dashboard sharing links with optional password protection
+- **Custom Properties**: Define custom event properties for advanced analytics dimensions
+- **Guest Access**: Manage team member invitations and access permissions (viewer/admin roles)
+- **Team Management**: Monitor team API access and organizational structure (read-only)
 - **Multi-tenant**: Support for team-based site management with namespace isolation
 - **Cross-references**: Reference sites from goals using Kubernetes selectors
 - **Observability**: Built-in status reporting and condition management
+
+## API Coverage
+
+**✅ Comprehensive Plausible API Support** - ~85% API coverage with 19 endpoints
+
+### Core Resources (v1beta1 namespaced)
+- **Sites**: Full CRUD operations, domain management, timezone configuration
+- **Goals**: Event and page-based goals, conversion tracking, goal management
+- **SharedLinks**: Dashboard sharing with password protection, link management
+- **CustomProperties**: Custom event dimensions, analytics enhancement
+- **Guests**: Team collaboration, role-based access (viewer/admin)
+- **Teams**: Organizational structure monitoring (read-only)
+
+### Advanced Features
+- **Pagination Support**: Efficient handling of large datasets
+- **Error Handling**: Comprehensive error reporting and recovery
+- **Cross-Resource References**: Site references from dependent resources
+- **Multi-tenancy**: Namespace-based isolation for team workflows
 
 ## Prerequisites
 
 - Kubernetes cluster with Crossplane v1.20+ installed
 - Plausible Analytics account with Sites API access
-- API key with `sites:provision:*` scope
+- API key with comprehensive scopes:
+  - `sites:provision:*` - Site management
+  - `sites:read:*` - Site listing and details
+  - `goals:provision:*` - Goal management
+  - `sites:shared-links:*` - Dashboard sharing
+  - `sites:custom-props:*` - Custom properties
+  - `teams:read:*` - Team information (optional)
 
 ## Installation
 
@@ -59,7 +87,7 @@ spec:
 
 ### 1. Create API Key Secret
 
-Create a Plausible API key with `sites:provision:*` scope in your Plausible dashboard, then create a Kubernetes secret:
+Create a Plausible API key with comprehensive scopes in your Plausible dashboard, then create a Kubernetes secret:
 
 ```bash
 kubectl create secret generic plausible-credentials \
@@ -213,6 +241,65 @@ spec:
     pagePath: "/download"
 ```
 
+### Advanced Resources Examples
+
+#### Shared Link Management
+
+```yaml
+# Create a password-protected shared dashboard
+apiVersion: sharedlink.plausible.m.crossplane.io/v1beta1
+kind: SharedLink
+metadata:
+  name: client-dashboard
+  namespace: marketing
+spec:
+  forProvider:
+    siteDomainRef:
+      name: marketing-site
+    name: "Client Dashboard Q4"
+    password: "secure-client-access-2024"
+  providerConfigRef:
+    name: default
+```
+
+#### Custom Analytics Properties
+
+```yaml
+# Define custom event properties for enhanced tracking
+apiVersion: customproperty.plausible.m.crossplane.io/v1beta1
+kind: CustomProperty
+metadata:
+  name: user-segment
+  namespace: marketing
+spec:
+  forProvider:
+    siteDomainRef:
+      name: marketing-site
+    key: "user_segment"
+    description: "Customer segment classification"
+  providerConfigRef:
+    name: default
+```
+
+#### Team Collaboration
+
+```yaml
+# Invite team members with specific roles
+apiVersion: guest.plausible.m.crossplane.io/v1beta1
+kind: Guest
+metadata:
+  name: data-analyst
+  namespace: marketing
+spec:
+  forProvider:
+    siteDomainRef:
+      name: marketing-site
+    email: "analyst@company.com"
+    role: "viewer"  # or "admin"
+  providerConfigRef:
+    name: default
+```
+
 ## Resource Reference
 
 ### Site Resource
@@ -308,13 +395,13 @@ make lint
 ### Common Issues
 
 #### 401 Unauthorized
-- Verify API key has `sites:provision:*` scope
+- Verify API key has required scopes (see Prerequisites section)
 - Check API key is correctly formatted in secret
 - Ensure Plausible instance has Sites API enabled
 
 #### 406 Not Acceptable
 - Verify your Plausible account has Sites API access
-- Check API key has the correct `sites:provision:*` scope
+- Check API key has all required scopes for the resources you're managing
 
 #### Connection Errors
 - Verify `baseURL` in ProviderConfig
