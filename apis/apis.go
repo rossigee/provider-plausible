@@ -20,8 +20,12 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
+	custompropertyv1beta1 "github.com/rossigee/provider-plausible/apis/customproperty/v1beta1"
 	goalv1beta1 "github.com/rossigee/provider-plausible/apis/goal/v1beta1"
+	guestv1beta1 "github.com/rossigee/provider-plausible/apis/guest/v1beta1"
+	sharedlinkv1beta1 "github.com/rossigee/provider-plausible/apis/sharedlink/v1beta1"
 	sitev1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
+	teamv1beta1 "github.com/rossigee/provider-plausible/apis/team/v1beta1"
 	v1beta1 "github.com/rossigee/provider-plausible/apis/v1beta1"
 )
 
@@ -31,6 +35,10 @@ func init() {
 		v1beta1.AddToScheme,
 		sitev1beta1.AddToScheme,
 		goalv1beta1.AddToScheme,
+		sharedlinkv1beta1.AddToScheme,
+		custompropertyv1beta1.AddToScheme,
+		guestv1beta1.AddToScheme,
+		teamv1beta1.AddToScheme,
 	)
 }
 
