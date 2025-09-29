@@ -36,5 +36,5 @@ func TestSetup(t *testing.T) {
 
 	// This will likely error or panic due to nil inputs, but that's expected
 	// The important thing is that the function signature is correct and compiles
-	Setup(nil, controller.Options{})
+	_ = Setup(nil, controller.Options{})
 }
