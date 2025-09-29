@@ -206,14 +206,10 @@ jobs:
           # Build binary
           make build
           echo "✅ Binary build successful"
-          
-          # Build Docker image locally (without push)
-          make docker.build
-          echo "✅ Docker image build successful"
-          
-          # Build Crossplane package locally (without push)
+
+          # Build Crossplane package locally (includes Docker image build)
           make xpkg.build
-          echo "✅ Crossplane package build successful"
+          echo "✅ Crossplane package and Docker image build successful"
           
           # Verify build artifacts exist
           ls -la _output/bin/linux_amd64/provider 2>/dev/null && echo "✅ Provider binary exists" || echo "❌ Provider binary missing"
