@@ -188,6 +188,15 @@ jobs:
       - name: Vendor Dependencies
         run: go mod vendor
 
+      - name: Install Crossplane CLI
+        run: |
+          # Install crossplane CLI required for xpkg.build
+          # CI environment doesn't automatically resolve make dependencies for tools
+          mkdir -p .cache/tools/linux_x86_64
+          curl -fsSL -o .cache/tools/linux_x86_64/crossplane-cli-v2.0.2 \
+            "https://releases.crossplane.io/stable/v2.0.2/bin/linux_amd64/crank"
+          chmod +x .cache/tools/linux_x86_64/crossplane-cli-v2.0.2
+
       - name: Validate Build Process
         run: |
           # Validate that all build steps work without publishing
