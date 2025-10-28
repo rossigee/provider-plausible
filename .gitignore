@@ -54,6 +54,7 @@ Thumbs.db
 coverage.txt
 coverage.html
 *.cover
+*.sarif
 
 # Local testing
 examples/**/secret.yaml
