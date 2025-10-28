@@ -153,6 +153,7 @@ jobs:
 
       - name: Fix Gosec SARIF format
         if: always() && hashFiles('gosec-results.sarif') != ''
+        continue-on-error: true
         run: |
           if [ -f gosec-results.sarif ]; then
             jq '.runs[].results[].locations[].physicalLocation.artifactLocation.uri |= if . == null or . == "" then "." else . end' gosec-results.sarif > gosec-results-fixed.sarif
@@ -162,6 +163,7 @@ jobs:
       - name: Upload Gosec Results
         uses: github/codeql-action/upload-sarif@v3
         if: always() && hashFiles('gosec-results.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: gosec-results.sarif
           category: gosec
