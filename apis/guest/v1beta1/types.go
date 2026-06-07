@@ -22,7 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 )
 
 // GuestParameters are the configurable fields of a Guest.
@@ -73,13 +73,13 @@ type GuestObservation struct {
 
 // A GuestSpec defines the desired state of a Guest.
 type GuestSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
+	xpv1.ManagedResourceSpec `json:",inline"`
 	ForProvider       GuestParameters `json:"forProvider"`
 }
 
 // A GuestStatus represents the observed state of a Guest.
 type GuestStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
+	xpv1.ManagedResourceStatus `json:",inline"`
 	AtProvider          GuestObservation `json:"atProvider,omitempty"`
 }
 

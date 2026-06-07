@@ -25,7 +25,7 @@ import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
@@ -273,7 +273,7 @@ func TestObserve(t *testing.T) {
 						},
 					},
 					Status: v1beta1.SiteStatus{
-						ResourceStatus: xpv1.ResourceStatus{
+						ManagedResourceStatus: xpv1.ManagedResourceStatus{
 							ConditionedStatus: xpv1.ConditionedStatus{
 								Conditions: []xpv1.Condition{xpv1.Available()},
 							},
@@ -355,7 +355,7 @@ func TestObserve(t *testing.T) {
 						},
 					},
 					Status: v1beta1.SiteStatus{
-						ResourceStatus: xpv1.ResourceStatus{
+						ManagedResourceStatus: xpv1.ManagedResourceStatus{
 							ConditionedStatus: xpv1.ConditionedStatus{
 								Conditions: []xpv1.Condition{xpv1.Available()},
 							},
@@ -443,7 +443,7 @@ func TestCreate(t *testing.T) {
 						},
 					},
 					Status: v1beta1.SiteStatus{
-						ResourceStatus: xpv1.ResourceStatus{
+						ManagedResourceStatus: xpv1.ManagedResourceStatus{
 							ConditionedStatus: xpv1.ConditionedStatus{
 								Conditions: []xpv1.Condition{xpv1.Creating()},
 							},
@@ -476,7 +476,7 @@ func TestCreate(t *testing.T) {
 						},
 					},
 					Status: v1beta1.SiteStatus{
-						ResourceStatus: xpv1.ResourceStatus{
+						ManagedResourceStatus: xpv1.ManagedResourceStatus{
 							ConditionedStatus: xpv1.ConditionedStatus{
 								Conditions: []xpv1.Condition{xpv1.Creating()},
 							},

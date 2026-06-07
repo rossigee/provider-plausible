@@ -22,7 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 )
 
 // GoalParameters are the configurable fields of a Goal.
@@ -74,13 +74,13 @@ type GoalObservation struct {
 
 // A GoalSpec defines the desired state of a Goal.
 type GoalSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
+	xpv1.ManagedResourceSpec `json:",inline"`
 	ForProvider       GoalParameters `json:"forProvider"`
 }
 
 // A GoalStatus represents the observed state of a Goal.
 type GoalStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
+	xpv1.ManagedResourceStatus `json:",inline"`
 	AtProvider          GoalObservation `json:"atProvider,omitempty"`
 }
 

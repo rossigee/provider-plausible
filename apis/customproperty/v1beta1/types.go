@@ -22,7 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 )
 
 // CustomPropertyParameters are the configurable fields of a CustomProperty.
@@ -67,13 +67,13 @@ type CustomPropertyObservation struct {
 
 // A CustomPropertySpec defines the desired state of a CustomProperty.
 type CustomPropertySpec struct {
-	xpv1.ResourceSpec `json:",inline"`
+	xpv1.ManagedResourceSpec `json:",inline"`
 	ForProvider       CustomPropertyParameters `json:"forProvider"`
 }
 
 // A CustomPropertyStatus represents the observed state of a CustomProperty.
 type CustomPropertyStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
+	xpv1.ManagedResourceStatus `json:",inline"`
 	AtProvider          CustomPropertyObservation `json:"atProvider,omitempty"`
 }
 
