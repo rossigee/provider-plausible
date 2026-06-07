@@ -3,8 +3,8 @@ kind: Provider
 metadata:
   name: provider-plausible
   annotations:
-    meta.crossplane.io/maintainer: Crossplane Maintainers <info@crossplane.io>
-    meta.crossplane.io/source: github.com/crossplane-contrib/provider-plausible
+    meta.crossplane.io/maintainer: Ross Golder <ross@golder.org>
+    meta.crossplane.io/source: github.com/rossigee/provider-plausible
     meta.crossplane.io/license: Apache-2.0
     meta.crossplane.io/description: |
       A Crossplane v2 native provider for managing Plausible Analytics resources.
