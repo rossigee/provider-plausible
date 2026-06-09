@@ -1,0 +1,111 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: detect-private-key
+        exclude: ^(operator/minioutil/client_test\.go|operator/minioutil/client\.go|docs/TLS_CONFIGURATION\.md|samples/.*\.yaml)$
+
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        language_version: python3
+        files: \.py$
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black]
+
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v2.12.2
+    hooks:
+      - id: golangci-lint
+        args: [--timeout=5m]
+
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.1
+    hooks:
+      - id: go-fmt
+        exclude: (zz_generated|internal/controller)
+      - id: go-imports
+        exclude: (zz_generated|internal/controller)
+      - id: go-vet-mod
+      - id: go-mod-tidy
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [-c=.yamllint.yaml]
+        exclude: ^package/  # generated CRD/webhook YAML; format is controlled by controller-gen
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.41.0
+    hooks:
+      - id: markdownlint
+        args: [--config=.markdownlint.yaml]
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: [--ignore=DL3008, --ignore=DL3009]
+
+  - repo: local
+    hooks:
+      - id: go-generate
+        name: go generate
+        entry: make generate
+        language: system
+        files: \.go$
+        pass_filenames: false
+
+      - id: go-test
+        name: go test
+        entry: make test
+        language: system
+        files: \.go$
+        pass_filenames: false
+
+      - id: no-commit-secrets
+        name: Check for secrets
+        entry: |
+          python3 -c "
+          import sys
+          import re
+
+          secret_patterns = [
+              r'(?i)(password|passwd|pwd)\s*[=:]\s*[\"\']\w+[\"\']\s*',
+              r'(?i)(api[_-]?key|apikey)\s*[=:]\s*[\"\']\w+[\"\']\s*',
+              r'(?i)(secret[_-]?key|secretkey)\s*[=:]\s*[\"\']\w+[\"\']\s*',
+              r'(?i)(access[_-]?token|accesstoken)\s*[=:]\s*[\"\']\w+[\"\']\s*',
+              r'(?i)(auth[_-]?token|authtoken)\s*[=:]\s*[\"\']\w+[\"\']\s*',
+              r'(?i)(discord[_-]?token|bot[_-]?token)\s*[=:]\s*[\"\']\w+[\"\']\s*',
+          ]
+
+          for filename in sys.argv[1:]:
+              try:
+                  with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
+                      content = f.read()
+                      for pattern in secret_patterns:
+                          if re.search(pattern, content):
+                              print(f'Potential secret found in {filename}')
+                              sys.exit(1)
+              except Exception:
+                  pass
+          "
+        language: system
+        files: \.(go|yaml|yml|json|md|sh|env)$
+        exclude: ^(operator/minioutil/client\.go|operator/minioutil/client_test\.go|docs/TLS_CONFIGURATION\.md|samples/.*\.yaml)$
