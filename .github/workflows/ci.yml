@@ -201,7 +201,7 @@ jobs:
           echo "✅ Binary build successful"
           
           # Build Docker image locally (without push)
-          make image
+          make build.all
           echo "✅ Docker image build successful"
           
           # Build Crossplane package locally (without push)
