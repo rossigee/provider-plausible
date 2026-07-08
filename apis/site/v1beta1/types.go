@@ -17,12 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"reflect"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	"reflect"
 )
 
 // SiteParameters are the configurable fields of a Site.
@@ -69,13 +67,13 @@ type SiteObservation struct {
 // A SiteSpec defines the desired state of a Site.
 type SiteSpec struct {
 	xpv1.ManagedResourceSpec `json:",inline"`
-	ForProvider       SiteParameters `json:"forProvider"`
+	ForProvider              SiteParameters `json:"forProvider"`
 }
 
 // A SiteStatus represents the observed state of a Site.
 type SiteStatus struct {
 	xpv1.ManagedResourceStatus `json:",inline"`
-	AtProvider          SiteObservation `json:"atProvider,omitempty"`
+	AtProvider                 SiteObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

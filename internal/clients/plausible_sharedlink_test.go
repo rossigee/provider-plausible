@@ -18,21 +18,20 @@ package clients
 
 import (
 	"encoding/json"
+	"github.com/google/go-cmp/cmp"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestClient_CreateSharedLink(t *testing.T) {
 	tests := []struct {
-		name             string
-		request          CreateSharedLinkRequest
-		responseCode     int
-		responseBody     interface{}
-		expectedLink     *SharedLink
-		expectedError    bool
+		name          string
+		request       CreateSharedLinkRequest
+		responseCode  int
+		responseBody  interface{}
+		expectedLink  *SharedLink
+		expectedError bool
 	}{
 		{
 			name: "successful creation",
@@ -176,9 +175,9 @@ func TestClient_ListSharedLinks(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:          "empty list",
-			siteDomain:    "example.com",
-			responseCode:  http.StatusOK,
+			name:         "empty list",
+			siteDomain:   "example.com",
+			responseCode: http.StatusOK,
 			responseBody: map[string]interface{}{
 				"shared_links": []map[string]interface{}{},
 				"meta": map[string]interface{}{

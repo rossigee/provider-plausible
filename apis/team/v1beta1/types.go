@@ -17,12 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"reflect"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	"reflect"
 )
 
 // TeamParameters are the configurable fields of a Team.
@@ -56,13 +54,13 @@ type TeamObservation struct {
 // A TeamSpec defines the desired state of a Team.
 type TeamSpec struct {
 	xpv1.ManagedResourceSpec `json:",inline"`
-	ForProvider       TeamParameters `json:"forProvider"`
+	ForProvider              TeamParameters `json:"forProvider"`
 }
 
 // A TeamStatus represents the observed state of a Team.
 type TeamStatus struct {
 	xpv1.ManagedResourceStatus `json:",inline"`
-	AtProvider          TeamObservation `json:"atProvider,omitempty"`
+	AtProvider                 TeamObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

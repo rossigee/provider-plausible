@@ -17,12 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"reflect"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	"reflect"
 )
 
 // GuestParameters are the configurable fields of a Guest.
@@ -74,13 +72,13 @@ type GuestObservation struct {
 // A GuestSpec defines the desired state of a Guest.
 type GuestSpec struct {
 	xpv1.ManagedResourceSpec `json:",inline"`
-	ForProvider       GuestParameters `json:"forProvider"`
+	ForProvider              GuestParameters `json:"forProvider"`
 }
 
 // A GuestStatus represents the observed state of a Guest.
 type GuestStatus struct {
 	xpv1.ManagedResourceStatus `json:",inline"`
-	AtProvider          GuestObservation `json:"atProvider,omitempty"`
+	AtProvider                 GuestObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

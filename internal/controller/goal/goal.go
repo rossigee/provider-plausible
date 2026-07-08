@@ -18,23 +18,20 @@ package goal
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
-
-	goalv1beta1 "github.com/rossigee/provider-plausible/apis/goal/v1beta1"
-	sitev1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	"github.com/pkg/errors"
+	"github.com/rossigee/provider-plausible/apis/goal/v1beta1"
+	"github.com/rossigee/provider-plausible/apis/site/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
 	"github.com/rossigee/provider-plausible/internal/tracing"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -50,7 +47,6 @@ const (
 // Setup adds a controller that reconciles Goal managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := managed.ControllerName(goalv1beta1.GoalGroupKind)
-
 
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(goalv1beta1.GoalGroupVersionKind),
@@ -138,8 +134,9 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotGoal)
-	ctx, span := tracing.StartSpanWithAttrs(ctx, "goal.observe", "Goal", cr.GetName(), "observe")
 	}
+	ctx, span := tracing.StartSpanWithAttrs(ctx, "goal.observe", "Goal", cr.GetName(), "observe")
+	defer span.End()
 
 	siteDomain, err := c.getSiteDomain(ctx, cr)
 	if err != nil {
@@ -224,8 +221,9 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotGoal)
-	ctx, span := tracing.StartSpanWithAttrs(ctx, "goal.create", "Goal", cr.GetName(), "create")
 	}
+	ctx, span := tracing.StartSpanWithAttrs(ctx, "goal.create", "Goal", cr.GetName(), "create")
+	defer span.End()
 
 	cr.SetConditions(xpv1.Creating())
 
@@ -264,10 +262,27 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
 	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
+		return managed.ExternalUpdate{}, errors.New(errNotGoal)
+	}
+
+	ctx, span := tracing.StartSpanWithAttrs(ctx, "goal.update", "Goal", cr.GetName(), "update")
+	defer span.End()
+
+	// Goals cannot be updated, they are immutable
+	_ = cr
+	_ = ctx
+
+	return managed.ExternalUpdate{}, nil
+}
+
+func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
+	cr, ok := mg.(*goalv1beta1.Goal)
+	if !ok {
 		return managed.ExternalDelete{}, errors.New(errNotGoal)
 	}
 
-	cr.SetConditions(xpv1.Deleting())
+	_, span := tracing.StartSpanWithAttrs(ctx, "goal.delete", "Goal", cr.GetName(), "delete")
+	defer span.End()
 
 	err := c.service.DeleteGoal(meta.GetExternalName(cr))
 	if err != nil && !clients.IsNotFound(err) {

@@ -21,8 +21,7 @@ limitations under the License.
 package v1beta1
 
 import (
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/scheme"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // Package type metadata.
@@ -36,8 +35,10 @@ var (
 	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
-	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion} //nolint:staticcheck
-
-	// AddToScheme adds all types of this group to the given scheme.
-	AddToScheme = SchemeBuilder.AddToScheme
+	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+	AddToScheme   = SchemeBuilder.AddToScheme
 )
+
+func addKnownTypes(s *runtime.Scheme) error {
+	return nil
+}

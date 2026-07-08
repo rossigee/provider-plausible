@@ -17,12 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"reflect"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	"reflect"
 )
 
 // CustomPropertyParameters are the configurable fields of a CustomProperty.
@@ -68,13 +66,13 @@ type CustomPropertyObservation struct {
 // A CustomPropertySpec defines the desired state of a CustomProperty.
 type CustomPropertySpec struct {
 	xpv1.ManagedResourceSpec `json:",inline"`
-	ForProvider       CustomPropertyParameters `json:"forProvider"`
+	ForProvider              CustomPropertyParameters `json:"forProvider"`
 }
 
 // A CustomPropertyStatus represents the observed state of a CustomProperty.
 type CustomPropertyStatus struct {
 	xpv1.ManagedResourceStatus `json:",inline"`
-	AtProvider          CustomPropertyObservation `json:"atProvider,omitempty"`
+	AtProvider                 CustomPropertyObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

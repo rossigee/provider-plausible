@@ -25,7 +25,6 @@ func (mg *Goal) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
 	return mg.Status.GetCondition(ct)
 }
 
-
 // GetManagementPolicies of this Goal.
 func (mg *Goal) GetManagementPolicies() xpv1.ManagementPolicies {
 	return mg.Spec.ManagementPolicies
@@ -46,7 +45,6 @@ func (mg *Goal) SetConditions(c ...xpv1.Condition) {
 	mg.Status.SetConditions(c...)
 }
 
-
 // SetManagementPolicies of this Goal.
 func (mg *Goal) SetManagementPolicies(r xpv1.ManagementPolicies) {
 	mg.Spec.ManagementPolicies = r
@@ -56,7 +54,6 @@ func (mg *Goal) SetManagementPolicies(r xpv1.ManagementPolicies) {
 func (mg *Goal) SetProviderConfigReference(r *xpv1.ProviderConfigReference) {
 	mg.Spec.ProviderConfigReference = r
 }
-
 
 // SetWriteConnectionSecretToReference of this Goal.
 func (mg *Goal) SetWriteConnectionSecretToReference(r *xpv1.LocalSecretReference) {

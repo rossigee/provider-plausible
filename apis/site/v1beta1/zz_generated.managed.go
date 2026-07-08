@@ -25,7 +25,6 @@ func (mg *Site) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
 	return mg.Status.GetCondition(ct)
 }
 
-
 // GetManagementPolicies of this Site.
 func (mg *Site) GetManagementPolicies() xpv1.ManagementPolicies {
 	return mg.Spec.ManagementPolicies
@@ -46,7 +45,6 @@ func (mg *Site) SetConditions(c ...xpv1.Condition) {
 	mg.Status.SetConditions(c...)
 }
 
-
 // SetManagementPolicies of this Site.
 func (mg *Site) SetManagementPolicies(r xpv1.ManagementPolicies) {
 	mg.Spec.ManagementPolicies = r
@@ -56,7 +54,6 @@ func (mg *Site) SetManagementPolicies(r xpv1.ManagementPolicies) {
 func (mg *Site) SetProviderConfigReference(r *xpv1.ProviderConfigReference) {
 	mg.Spec.ProviderConfigReference = r
 }
-
 
 // SetWriteConnectionSecretToReference of this Site.
 func (mg *Site) SetWriteConnectionSecretToReference(r *xpv1.LocalSecretReference) {

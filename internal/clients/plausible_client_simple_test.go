@@ -18,12 +18,11 @@ package clients
 
 import (
 	"encoding/json"
+	"github.com/google/go-cmp/cmp"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestClient_GetSite(t *testing.T) {
@@ -66,7 +65,7 @@ func TestClient_GetSite(t *testing.T) {
 				if r.URL.Path != expectedPath {
 					t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 				}
-				
+
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(tt.responseCode)
 				if tt.responseBody != nil {
@@ -275,7 +274,7 @@ func TestIsNotFound_Production(t *testing.T) {
 	if !IsNotFound(err) {
 		t.Error("Expected IsNotFound to return true for 404 error")
 	}
-	
+
 	// Test string contains logic
 	if !strings.Contains(err.Error(), "404") {
 		t.Error("Error message should contain '404'")

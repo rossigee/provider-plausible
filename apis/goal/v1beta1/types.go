@@ -17,12 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"reflect"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	"reflect"
 )
 
 // GoalParameters are the configurable fields of a Goal.
@@ -75,13 +73,13 @@ type GoalObservation struct {
 // A GoalSpec defines the desired state of a Goal.
 type GoalSpec struct {
 	xpv1.ManagedResourceSpec `json:",inline"`
-	ForProvider       GoalParameters `json:"forProvider"`
+	ForProvider              GoalParameters `json:"forProvider"`
 }
 
 // A GoalStatus represents the observed state of a Goal.
 type GoalStatus struct {
 	xpv1.ManagedResourceStatus `json:",inline"`
-	AtProvider          GoalObservation `json:"atProvider,omitempty"`
+	AtProvider                 GoalObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

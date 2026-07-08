@@ -18,38 +18,35 @@ package main
 
 import (
 	"context"
-	"os"
-	"path/filepath"
-	"runtime"
-	"time"
-
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	xpcontroller "github.com/crossplane/crossplane-runtime/v2/pkg/controller"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/feature"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
-
 	"github.com/rossigee/provider-plausible/apis"
 	"github.com/rossigee/provider-plausible/internal/controller"
 	"github.com/rossigee/provider-plausible/internal/features"
 	"github.com/rossigee/provider-plausible/internal/tracing"
 	"github.com/rossigee/provider-plausible/internal/version"
+	"gopkg.in/alecthomas/kingpin.v2"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"time"
 )
 
 func main() {
 	var (
-		app                = kingpin.New(filepath.Base(os.Args[0]), "Plausible support for Crossplane.").DefaultEnvars()
-		debug              = app.Flag("debug", "Run with debug logging.").Short('d').Bool()
-		leaderElection     = app.Flag("leader-election", "Use leader election for the controller manager.").Short('l').Default("false").OverrideDefaultFromEnvar("LEADER_ELECTION").Bool()
-		leaderElectionNS   = app.Flag("leader-election-namespace", "Namespace to use for leader election.").Default("crossplane-system").OverrideDefaultFromEnvar("LEADER_ELECTION_NAMESPACE").String()
-		pollInterval       = app.Flag("poll", "How often individual resources will be checked for drift from the desired state").Short('p').Default("1m").Duration()
-		maxReconcileRate   = app.Flag("max-reconcile-rate", "The global maximum rate per second at which resources may checked for drift from the desired state.").Default("10").Int()
-		syncPeriod         = app.Flag("sync", "How often all resources will be double-checked for drift from the desired state.").Short('s').Default("1h").Duration()
+		app                      = kingpin.New(filepath.Base(os.Args[0]), "Plausible support for Crossplane.").DefaultEnvars()
+		debug                    = app.Flag("debug", "Run with debug logging.").Short('d').Bool()
+		leaderElection           = app.Flag("leader-election", "Use leader election for the controller manager.").Short('l').Default("false").OverrideDefaultFromEnvar("LEADER_ELECTION").Bool()
+		leaderElectionNS         = app.Flag("leader-election-namespace", "Namespace to use for leader election.").Default("crossplane-system").OverrideDefaultFromEnvar("LEADER_ELECTION_NAMESPACE").String()
+		pollInterval             = app.Flag("poll", "How often individual resources will be checked for drift from the desired state").Short('p').Default("1m").Duration()
+		maxReconcileRate         = app.Flag("max-reconcile-rate", "The global maximum rate per second at which resources may checked for drift from the desired state.").Default("10").Int()
+		syncPeriod               = app.Flag("sync", "How often all resources will be double-checked for drift from the desired state.").Short('s').Default("1h").Duration()
 		enableManagementPolicies = app.Flag("enable-management-policies", "Enable support for management policies.").Default("true").OverrideDefaultFromEnvar("ENABLE_MANAGEMENT_POLICIES").Bool()
 	)
 
@@ -60,7 +57,6 @@ func main() {
 
 	shutdownTracing := tracing.Init("provider-plausible")
 	defer shutdownTracing(context.Background())
-
 
 	if *debug {
 		// The controller-runtime runs with a no-op logger by default. It is

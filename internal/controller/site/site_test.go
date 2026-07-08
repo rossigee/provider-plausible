@@ -19,20 +19,17 @@ package site
 import (
 	"context"
 	"fmt"
-	"testing"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/test"
-
-	v1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	"github.com/google/go-cmp/cmp"
+	"github.com/pkg/errors"
+	"github.com/rossigee/provider-plausible/apis/site/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
 )
 
 // PlausibleService defines the interface for Plausible operations
@@ -606,7 +603,7 @@ func TestUpdate(t *testing.T) {
 					},
 					Spec: v1beta1.SiteSpec{
 						ForProvider: v1beta1.SiteParameters{
-							Domain:    "old.example.com", // Should remain unchanged
+							Domain:    "old.example.com",      // Should remain unchanged
 							NewDomain: ptr("new.example.com"), // Should remain unchanged
 						},
 					},
@@ -620,7 +617,7 @@ func TestUpdate(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			// Set external name for update
 			meta.SetExternalName(tc.args.cr, tc.args.cr.Spec.ForProvider.Domain)
-			
+
 			e := &testExternal{service: tc.args.service}
 			updated, err := e.Update(context.Background(), tc.args.cr)
 
@@ -716,7 +713,7 @@ func TestDelete(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			// Set external name for delete
 			meta.SetExternalName(tc.args.cr, tc.args.cr.Spec.ForProvider.Domain)
-			
+
 			e := &testExternal{service: tc.args.service}
 			_, err := e.Delete(context.Background(), tc.args.cr)
 

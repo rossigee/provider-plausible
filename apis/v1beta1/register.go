@@ -17,16 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
+	"k8s.io/apimachinery/pkg/runtime"
+	"plausible.crossplane.io"
 	"reflect"
-
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/scheme"
-)
-
-// Package type metadata.
-const (
-	Group   = "plausible.crossplane.io"
-	Version = "v1beta1"
+	"v1beta1"
 )
 
 var (
@@ -34,10 +28,8 @@ var (
 	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
-	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion} //nolint:staticcheck
-
-	// AddToScheme adds the types in this group-version to the given scheme.
-	AddToScheme = SchemeBuilder.AddToScheme
+	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+	AddToScheme   = SchemeBuilder.AddToScheme
 )
 
 // ProviderConfig type metadata.
@@ -61,7 +53,6 @@ var (
 	ProviderConfigUsageListGroupVersionKind = SchemeGroupVersion.WithKind(ProviderConfigUsageListKind)
 )
 
-func init() {
-	SchemeBuilder.Register(&ProviderConfig{}, &ProviderConfigList{})
-	SchemeBuilder.Register(&ProviderConfigUsage{}, &ProviderConfigUsageList{})
+func addKnownTypes(s *runtime.Scheme) error {
+	return nil
 }

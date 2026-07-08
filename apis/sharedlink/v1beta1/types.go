@@ -17,12 +17,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"reflect"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	"reflect"
 )
 
 // SharedLinkParameters are the configurable fields of a SharedLink.
@@ -69,13 +67,13 @@ type SharedLinkObservation struct {
 // A SharedLinkSpec defines the desired state of a SharedLink.
 type SharedLinkSpec struct {
 	xpv1.ManagedResourceSpec `json:",inline"`
-	ForProvider       SharedLinkParameters `json:"forProvider"`
+	ForProvider              SharedLinkParameters `json:"forProvider"`
 }
 
 // A SharedLinkStatus represents the observed state of a SharedLink.
 type SharedLinkStatus struct {
 	xpv1.ManagedResourceStatus `json:",inline"`
-	AtProvider          SharedLinkObservation `json:"atProvider,omitempty"`
+	AtProvider                 SharedLinkObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
