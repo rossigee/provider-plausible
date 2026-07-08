@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -36,6 +37,7 @@ import (
 	"github.com/rossigee/provider-plausible/apis"
 	"github.com/rossigee/provider-plausible/internal/controller"
 	"github.com/rossigee/provider-plausible/internal/features"
+	"github.com/rossigee/provider-plausible/internal/tracing"
 	"github.com/rossigee/provider-plausible/internal/version"
 )
 
@@ -55,6 +57,12 @@ func main() {
 
 	zl := zap.New(zap.UseDevMode(*debug))
 	log := logging.NewLogrLogger(zl.WithName("provider-plausible"))
+
+	shutdownTracing := tracing.Init("provider-plausible")
+	defer shutdownTracing(context.Background())
+
+	shutdownTracing(context.Background())
+
 	if *debug {
 		// The controller-runtime runs with a no-op logger by default. It is
 		// *very* verbose even at info level, so we only provide it a real
