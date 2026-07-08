@@ -32,6 +32,7 @@ import (
 
 	sitev1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
+	"github.com/rossigee/provider-plausible/internal/tracing"
 )
 
 const (
@@ -104,6 +105,9 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+	_, span := tracing.StartSpanWithAttrs(ctx, "site.observe", "Site", mg.GetName(), "observe")
+	defer span.End()
+
 	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotSite)
@@ -178,6 +182,9 @@ func (c *external) isUpToDate(cr *sitev1beta1.Site, site *clients.Site) bool {
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
+	_, span := tracing.StartSpanWithAttrs(ctx, "site.create", "Site", mg.GetName(), "create")
+	defer span.End()
+
 	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotSite)
@@ -214,6 +221,9 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
+	_, span := tracing.StartSpanWithAttrs(ctx, "site.update", "Site", mg.GetName(), "update")
+	defer span.End()
+
 	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotSite)
@@ -231,6 +241,9 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
+	_, span := tracing.StartSpanWithAttrs(ctx, "site.delete", "Site", mg.GetName(), "delete")
+	defer span.End()
+
 	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalDelete{}, errors.New(errNotSite)

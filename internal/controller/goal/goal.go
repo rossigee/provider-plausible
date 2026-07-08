@@ -34,6 +34,7 @@ import (
 	goalv1beta1 "github.com/rossigee/provider-plausible/apis/goal/v1beta1"
 	sitev1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
+	"github.com/rossigee/provider-plausible/internal/tracing"
 )
 
 const (
@@ -134,6 +135,9 @@ func (c *external) getSiteDomain(ctx context.Context, cr *goalv1beta1.Goal) (str
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+	ctx, span := tracing.StartSpanWithAttrs(ctx, "goal.observe", "Goal", mg.GetName(), "observe")
+	defer span.End()
+
 	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotGoal)
@@ -219,6 +223,9 @@ func (c *external) goalMatches(cr *goalv1beta1.Goal, goal *clients.Goal) bool {
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
+	ctx, span := tracing.StartSpanWithAttrs(ctx, "goal.create", "Goal", mg.GetName(), "create")
+	defer span.End()
+
 	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotGoal)
@@ -259,11 +266,17 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
+	_, span := tracing.StartSpanWithAttrs(ctx, "goal.update", "Goal", mg.GetName(), "update")
+	defer span.End()
+
 	// Goals cannot be updated in Plausible API
 	return managed.ExternalUpdate{}, nil
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
+	_, span := tracing.StartSpanWithAttrs(ctx, "goal.delete", "Goal", mg.GetName(), "delete")
+	defer span.End()
+
 	cr, ok := mg.(*goalv1beta1.Goal)
 	if !ok {
 		return managed.ExternalDelete{}, errors.New(errNotGoal)
