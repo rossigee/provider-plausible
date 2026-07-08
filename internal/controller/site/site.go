@@ -105,13 +105,12 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	_, span := tracing.StartSpanWithAttrs(ctx, "site.observe", "Site", mg.GetName(), "observe")
-	defer span.End()
-
 	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotSite)
 	}
+	_, span := tracing.StartSpanWithAttrs(ctx, "site.observe", "Site", cr.GetName(), "observe")
+	defer span.End()
 
 	// If we have an external name (site ID), try to get by ID
 	if meta.GetExternalName(cr) != "" {
@@ -182,13 +181,12 @@ func (c *external) isUpToDate(cr *sitev1beta1.Site, site *clients.Site) bool {
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	_, span := tracing.StartSpanWithAttrs(ctx, "site.create", "Site", mg.GetName(), "create")
-	defer span.End()
-
 	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotSite)
 	}
+	_, span := tracing.StartSpanWithAttrs(ctx, "site.create", "Site", cr.GetName(), "create")
+	defer span.End()
 
 	cr.SetConditions(xpv1.Creating())
 
@@ -221,13 +219,12 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	_, span := tracing.StartSpanWithAttrs(ctx, "site.update", "Site", mg.GetName(), "update")
-	defer span.End()
-
 	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotSite)
 	}
+	_, span := tracing.StartSpanWithAttrs(ctx, "site.update", "Site", cr.GetName(), "update")
+	defer span.End()
 
 	// Only domain can be updated
 	if cr.Spec.ForProvider.NewDomain != nil && *cr.Spec.ForProvider.NewDomain != cr.Status.AtProvider.Domain {
@@ -241,13 +238,12 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
-	_, span := tracing.StartSpanWithAttrs(ctx, "site.delete", "Site", mg.GetName(), "delete")
-	defer span.End()
-
 	cr, ok := mg.(*sitev1beta1.Site)
 	if !ok {
 		return managed.ExternalDelete{}, errors.New(errNotSite)
 	}
+	_, span := tracing.StartSpanWithAttrs(ctx, "site.delete", "Site", cr.GetName(), "delete")
+	defer span.End()
 
 	cr.SetConditions(xpv1.Deleting())
 
