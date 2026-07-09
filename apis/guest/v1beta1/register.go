@@ -22,10 +22,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// Goal type metadata.
+// Guest type metadata.
 var (
-	GoalKind             = reflect.TypeOf(Goal{}).Name()
-	GoalGroupKind        = schema.GroupKind{Group: Group, Kind: GoalKind}
-	GoalKindAPIVersion   = GoalKind + "." + SchemeGroupVersion.String()
-	GoalGroupVersionKind = SchemeGroupVersion.WithKind(GoalKind)
+	GuestKind             = reflect.TypeOf(Guest{}).Name()
+	GuestGroupKind        = schema.GroupKind{Group: Group, Kind: GuestKind}
+	GuestKindAPIVersion   = GuestKind + "." + SchemeGroupVersion.String()
+	GuestGroupVersionKind = SchemeGroupVersion.WithKind(GuestKind)
 )

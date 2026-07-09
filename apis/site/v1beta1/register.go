@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Crossplane Authors.
+Copyright 2025 The Crossplane Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,24 +17,15 @@ limitations under the License.
 package v1beta1
 
 import (
-	"k8s.io/apimachinery/pkg/runtime"
+	"reflect"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// Package type metadata.
-const (
-	Group   = "site.plausible.m.crossplane.io"
-	Version = "v1beta1"
-)
-
+// Site type metadata.
 var (
-	// SchemeGroupVersion is group version used to register these objects
-	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
-
-	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
-	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
-	AddToScheme   = SchemeBuilder.AddToScheme
+	SiteKind             = reflect.TypeOf(Site{}).Name()
+	SiteGroupKind        = schema.GroupKind{Group: Group, Kind: SiteKind}
+	SiteKindAPIVersion   = SiteKind + "." + SchemeGroupVersion.String()
+	SiteGroupVersionKind = SchemeGroupVersion.WithKind(SiteKind)
 )
-
-func addKnownTypes(s *runtime.Scheme) error {
-	return nil
-}

@@ -17,10 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/crossplane/crossplane/apis/v2/core/v2"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"reflect"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // SharedLinkParameters are the configurable fields of a SharedLink.
@@ -104,15 +102,4 @@ type SharedLinkList struct {
 	Items           []SharedLink `json:"items"`
 }
 
-// SharedLink type metadata.
-var (
-	SharedLinkKind             = reflect.TypeOf(SharedLink{}).Name()
-	SharedLinkGroupKind        = schema.GroupKind{Group: Group, Kind: SharedLinkKind}.String()
-	SharedLinkKindAPIVersion   = SharedLinkKind + "." + SchemeGroupVersion.String()
-	SharedLinkGroupVersionKind = SchemeGroupVersion.WithKind(SharedLinkKind)
 
-	SharedLinkListKind             = reflect.TypeOf(SharedLinkList{}).Name()
-	SharedLinkListGroupKind        = schema.GroupKind{Group: Group, Kind: SharedLinkListKind}.String()
-	SharedLinkListKindAPIVersion   = SharedLinkListKind + "." + SchemeGroupVersion.String()
-	SharedLinkListGroupVersionKind = SchemeGroupVersion.WithKind(SharedLinkListKind)
-)

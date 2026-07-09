@@ -17,10 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/crossplane/crossplane/apis/v2/core/v2"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"reflect"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GoalParameters are the configurable fields of a Goal.
@@ -109,15 +107,4 @@ type GoalList struct {
 	Items           []Goal `json:"items"`
 }
 
-// Goal type metadata.
-var (
-	GoalKind             = reflect.TypeOf(Goal{}).Name()
-	GoalGroupKind        = schema.GroupKind{Group: Group, Kind: GoalKind}.String()
-	GoalKindAPIVersion   = GoalKind + "." + SchemeGroupVersion.String()
-	GoalGroupVersionKind = SchemeGroupVersion.WithKind(GoalKind)
 
-	GoalListKind             = reflect.TypeOf(GoalList{}).Name()
-	GoalListGroupKind        = schema.GroupKind{Group: Group, Kind: GoalListKind}.String()
-	GoalListKindAPIVersion   = GoalListKind + "." + SchemeGroupVersion.String()
-	GoalListGroupVersionKind = SchemeGroupVersion.WithKind(GoalListKind)
-)

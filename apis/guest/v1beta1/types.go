@@ -17,10 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/crossplane/crossplane/apis/v2/core/v2"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"reflect"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GuestParameters are the configurable fields of a Guest.
@@ -109,15 +107,4 @@ type GuestList struct {
 	Items           []Guest `json:"items"`
 }
 
-// Guest type metadata.
-var (
-	GuestKind             = reflect.TypeOf(Guest{}).Name()
-	GuestGroupKind        = schema.GroupKind{Group: Group, Kind: GuestKind}.String()
-	GuestKindAPIVersion   = GuestKind + "." + SchemeGroupVersion.String()
-	GuestGroupVersionKind = SchemeGroupVersion.WithKind(GuestKind)
 
-	GuestListKind             = reflect.TypeOf(GuestList{}).Name()
-	GuestListGroupKind        = schema.GroupKind{Group: Group, Kind: GuestListKind}.String()
-	GuestListKindAPIVersion   = GuestListKind + "." + SchemeGroupVersion.String()
-	GuestListGroupVersionKind = SchemeGroupVersion.WithKind(GuestListKind)
-)

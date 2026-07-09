@@ -22,10 +22,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// Goal type metadata.
+// SharedLink type metadata.
 var (
-	GoalKind             = reflect.TypeOf(Goal{}).Name()
-	GoalGroupKind        = schema.GroupKind{Group: Group, Kind: GoalKind}
-	GoalKindAPIVersion   = GoalKind + "." + SchemeGroupVersion.String()
-	GoalGroupVersionKind = SchemeGroupVersion.WithKind(GoalKind)
+	SharedLinkKind             = reflect.TypeOf(SharedLink{}).Name()
+	SharedLinkGroupKind        = schema.GroupKind{Group: Group, Kind: SharedLinkKind}
+	SharedLinkKindAPIVersion   = SharedLinkKind + "." + SchemeGroupVersion.String()
+	SharedLinkGroupVersionKind = SchemeGroupVersion.WithKind(SharedLinkKind)
 )

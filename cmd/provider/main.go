@@ -18,24 +18,25 @@ package main
 
 import (
 	"context"
-	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
+	"os"
+	"path/filepath"
+	"runtime"
+	"time"
+
+	xpcontroller "github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/feature"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
 	"github.com/rossigee/provider-plausible/apis"
-	"github.com/rossigee/provider-plausible/internal/controller"
+	plausiblecontroller "github.com/rossigee/provider-plausible/internal/controller"
 	"github.com/rossigee/provider-plausible/internal/features"
 	"github.com/rossigee/provider-plausible/internal/tracing"
 	"github.com/rossigee/provider-plausible/internal/version"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"os"
-	"path/filepath"
-	"runtime"
-	"sigs.k8s.io/controller-runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"time"
 )
 
 func main() {
@@ -121,7 +122,7 @@ func main() {
 		kingpin.FatalIfError(err, "Cannot add Plausible APIs to scheme")
 	}
 
-	if err := controller.Setup(mgr, o); err != nil {
+	if err := plausiblecontroller.Setup(mgr, o); err != nil {
 		kingpin.FatalIfError(err, "Cannot setup Plausible controllers")
 	}
 

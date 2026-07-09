@@ -17,10 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/crossplane/crossplane/apis/v2/core/v2"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"reflect"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // SiteParameters are the configurable fields of a Site.
@@ -103,15 +101,4 @@ type SiteList struct {
 	Items           []Site `json:"items"`
 }
 
-// Site type metadata.
-var (
-	SiteKind             = reflect.TypeOf(Site{}).Name()
-	SiteGroupKind        = schema.GroupKind{Group: Group, Kind: SiteKind}.String()
-	SiteKindAPIVersion   = SiteKind + "." + SchemeGroupVersion.String()
-	SiteGroupVersionKind = SchemeGroupVersion.WithKind(SiteKind)
 
-	SiteListKind             = reflect.TypeOf(SiteList{}).Name()
-	SiteListGroupKind        = schema.GroupKind{Group: Group, Kind: SiteListKind}.String()
-	SiteListKindAPIVersion   = SiteListKind + "." + SchemeGroupVersion.String()
-	SiteListGroupVersionKind = SchemeGroupVersion.WithKind(SiteListKind)
-)

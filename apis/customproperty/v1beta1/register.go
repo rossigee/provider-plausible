@@ -22,10 +22,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// Goal type metadata.
+// CustomProperty type metadata.
 var (
-	GoalKind             = reflect.TypeOf(Goal{}).Name()
-	GoalGroupKind        = schema.GroupKind{Group: Group, Kind: GoalKind}
-	GoalKindAPIVersion   = GoalKind + "." + SchemeGroupVersion.String()
-	GoalGroupVersionKind = SchemeGroupVersion.WithKind(GoalKind)
+	CustomPropertyKind             = reflect.TypeOf(CustomProperty{}).Name()
+	CustomPropertyGroupKind        = schema.GroupKind{Group: Group, Kind: CustomPropertyKind}
+	CustomPropertyKindAPIVersion   = CustomPropertyKind + "." + SchemeGroupVersion.String()
+	CustomPropertyGroupVersionKind = SchemeGroupVersion.WithKind(CustomPropertyKind)
 )

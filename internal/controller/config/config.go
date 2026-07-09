@@ -22,12 +22,13 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/providerconfig"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/rossigee/provider-plausible/apis/v1beta1"
-	"sigs.k8s.io/controller-runtime"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // Setup adds a controller that reconciles ProviderConfigs.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	name := providerconfig.ControllerName(v1beta1.ProviderConfigGroupKind)
+	name := providerconfig.ControllerName(v1beta1.ProviderConfigGroupKind.String())
 
 	of := resource.ProviderConfigKinds{
 		Config:    v1beta1.ProviderConfigGroupVersionKind,

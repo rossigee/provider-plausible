@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Crossplane Authors.
+Copyright 2025 The Crossplane Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1beta1 contains the v1beta1 group Plausible resources of the Plausible provider.
+// Package v1beta1 contains the v1beta1 group plausible.crossplane.io resources of the provider.
 // +kubebuilder:object:generate=true
-// +groupName=team.plausible.m.crossplane.io
+// +groupName=plausible.crossplane.io
 // +versionName=v1beta1
 package v1beta1
 
@@ -25,21 +25,23 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// Package type metadata.
 const (
-	Group   = "team.plausible.m.crossplane.io"
+	Group   = "plausible.crossplane.io"
 	Version = "v1beta1"
 )
 
 var (
-	// SchemeGroupVersion is group version used to register these objects
 	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
-
-	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
-	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
-	AddToScheme   = SchemeBuilder.AddToScheme
+	SchemeBuilder      = runtime.NewSchemeBuilder(addKnownTypes)
+	AddToScheme        = SchemeBuilder.AddToScheme
 )
 
 func addKnownTypes(s *runtime.Scheme) error {
+	s.AddKnownTypes(SchemeGroupVersion,
+		&ProviderConfig{},
+		&ProviderConfigList{},
+		&ProviderConfigUsage{},
+		&ProviderConfigUsageList{},
+	)
 	return nil
 }

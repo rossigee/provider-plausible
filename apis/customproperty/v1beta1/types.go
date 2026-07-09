@@ -17,10 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/crossplane/crossplane/apis/v2/core/v2"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"reflect"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // CustomPropertyParameters are the configurable fields of a CustomProperty.
@@ -103,15 +101,4 @@ type CustomPropertyList struct {
 	Items           []CustomProperty `json:"items"`
 }
 
-// CustomProperty type metadata.
-var (
-	CustomPropertyKind             = reflect.TypeOf(CustomProperty{}).Name()
-	CustomPropertyGroupKind        = schema.GroupKind{Group: Group, Kind: CustomPropertyKind}.String()
-	CustomPropertyKindAPIVersion   = CustomPropertyKind + "." + SchemeGroupVersion.String()
-	CustomPropertyGroupVersionKind = SchemeGroupVersion.WithKind(CustomPropertyKind)
 
-	CustomPropertyListKind             = reflect.TypeOf(CustomPropertyList{}).Name()
-	CustomPropertyListGroupKind        = schema.GroupKind{Group: Group, Kind: CustomPropertyListKind}.String()
-	CustomPropertyListKindAPIVersion   = CustomPropertyListKind + "." + SchemeGroupVersion.String()
-	CustomPropertyListGroupVersionKind = SchemeGroupVersion.WithKind(CustomPropertyListKind)
-)

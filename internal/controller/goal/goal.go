@@ -18,19 +18,20 @@ package goal
 
 import (
 	"context"
+
 	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
-	"github.com/crossplane/crossplane/apis/v2/core/v2"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/pkg/errors"
-	"github.com/rossigee/provider-plausible/apis/goal/v1beta1"
-	"github.com/rossigee/provider-plausible/apis/site/v1beta1"
+	goalv1beta1 "github.com/rossigee/provider-plausible/apis/goal/v1beta1"
+	sitev1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
 	"github.com/rossigee/provider-plausible/internal/clients"
 	"github.com/rossigee/provider-plausible/internal/tracing"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -46,7 +47,7 @@ const (
 
 // Setup adds a controller that reconciles Goal managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	name := managed.ControllerName(goalv1beta1.GoalGroupKind)
+	name := managed.ControllerName(goalv1beta1.GoalGroupKind.String())
 
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(goalv1beta1.GoalGroupVersionKind),

@@ -14,18 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package v1beta1 contains the v1beta1 group goal.plausible.m.crossplane.io resources of the provider.
+// +kubebuilder:object:generate=true
+// +groupName=goal.plausible.m.crossplane.io
+// +versionName=v1beta1
 package v1beta1
 
 import (
-	"reflect"
-
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// Goal type metadata.
-var (
-	GoalKind             = reflect.TypeOf(Goal{}).Name()
-	GoalGroupKind        = schema.GroupKind{Group: Group, Kind: GoalKind}
-	GoalKindAPIVersion   = GoalKind + "." + SchemeGroupVersion.String()
-	GoalGroupVersionKind = SchemeGroupVersion.WithKind(GoalKind)
+const (
+	Group   = "goal.plausible.m.crossplane.io"
+	Version = "v1beta1"
 )
+
+var (
+	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
+	SchemeBuilder      = runtime.NewSchemeBuilder(addKnownTypes)
+	AddToScheme        = SchemeBuilder.AddToScheme
+)
+
+func addKnownTypes(s *runtime.Scheme) error {
+	s.AddKnownTypes(SchemeGroupVersion,
+		&Goal{},
+		&GoalList{},
+	)
+	return nil
+}
