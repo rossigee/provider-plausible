@@ -21,8 +21,7 @@ limitations under the License.
 package v1beta1
 
 import (
-	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
-
+	"github.com/crossplane/crossplane/apis/v2/core/v2"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -114,12 +113,12 @@ func (in *CustomPropertyParameters) DeepCopyInto(out *CustomPropertyParameters) 
 	}
 	if in.SiteDomainRef != nil {
 		in, out := &in.SiteDomainRef, &out.SiteDomainRef
-		*out = new(xpv1.Reference)
+		*out = new(v2.Reference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.SiteDomainSelector != nil {
 		in, out := &in.SiteDomainSelector, &out.SiteDomainSelector
-		*out = new(xpv1.Selector)
+		*out = new(v2.Selector)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Description != nil {
