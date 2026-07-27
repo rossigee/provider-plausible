@@ -19,42 +19,42 @@ package v1beta1
 
 import xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 
-// GetCondition of this Site.
-func (mg *Site) GetCondition(ct xpv2.ConditionType) xpv2.Condition {
+// GetCondition of this Guest.
+func (mg *Guest) GetCondition(ct xpv2.ConditionType) xpv2.Condition {
 	return mg.Status.GetCondition(ct)
 }
 
-// GetManagementPolicies of this Site.
-func (mg *Site) GetManagementPolicies() xpv2.ManagementPolicies {
+// GetManagementPolicies of this Guest.
+func (mg *Guest) GetManagementPolicies() xpv2.ManagementPolicies {
 	return mg.Spec.ManagementPolicies
 }
 
-// GetProviderConfigReference of this Site.
-func (mg *Site) GetProviderConfigReference() *xpv2.ProviderConfigReference {
+// GetProviderConfigReference of this Guest.
+func (mg *Guest) GetProviderConfigReference() *xpv2.ProviderConfigReference {
 	return mg.Spec.ProviderConfigReference
 }
 
-// GetWriteConnectionSecretToReference of this Site.
-func (mg *Site) GetWriteConnectionSecretToReference() *xpv2.LocalSecretReference {
+// GetWriteConnectionSecretToReference of this Guest.
+func (mg *Guest) GetWriteConnectionSecretToReference() *xpv2.LocalSecretReference {
 	return mg.Spec.WriteConnectionSecretToReference
 }
 
-// SetConditions of this Site.
-func (mg *Site) SetConditions(c ...xpv2.Condition) {
+// SetConditions of this Guest.
+func (mg *Guest) SetConditions(c ...xpv2.Condition) {
 	mg.Status.SetConditions(c...)
 }
 
-// SetManagementPolicies of this Site.
-func (mg *Site) SetManagementPolicies(r xpv2.ManagementPolicies) {
+// SetManagementPolicies of this Guest.
+func (mg *Guest) SetManagementPolicies(r xpv2.ManagementPolicies) {
 	mg.Spec.ManagementPolicies = r
 }
 
-// SetProviderConfigReference of this Site.
-func (mg *Site) SetProviderConfigReference(r *xpv2.ProviderConfigReference) {
+// SetProviderConfigReference of this Guest.
+func (mg *Guest) SetProviderConfigReference(r *xpv2.ProviderConfigReference) {
 	mg.Spec.ProviderConfigReference = r
 }
 
-// SetWriteConnectionSecretToReference of this Site.
-func (mg *Site) SetWriteConnectionSecretToReference(r *xpv2.LocalSecretReference) {
+// SetWriteConnectionSecretToReference of this Guest.
+func (mg *Guest) SetWriteConnectionSecretToReference(r *xpv2.LocalSecretReference) {
 	mg.Spec.WriteConnectionSecretToReference = r
 }
