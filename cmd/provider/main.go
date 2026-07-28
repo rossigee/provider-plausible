@@ -33,6 +33,8 @@ import (
 	"github.com/rossigee/provider-plausible/internal/tracing"
 	"github.com/rossigee/provider-plausible/internal/version"
 	"gopkg.in/alecthomas/kingpin.v2"
+	apimachineryruntime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -61,7 +63,6 @@ func main() {
 
 	// Always set the controller-runtime logger to prevent logging errors
 	ctrl.SetLogger(zl)
-	}
 
 	// Log startup information with build and configuration details
 	log.Info("Provider starting up",
@@ -82,6 +83,14 @@ func main() {
 		"poll-interval", pollInterval.String(),
 		"max-reconcile-rate", *maxReconcileRate)
 
+	s := apimachineryruntime.NewScheme()
+	if err := scheme.AddToScheme(s); err != nil {
+		kingpin.FatalIfError(err, "Cannot add k8s types to scheme")
+	}
+	if err := apis.AddToScheme(s); err != nil {
+		kingpin.FatalIfError(err, "Cannot add Plausible APIs to scheme")
+	}
+
 	cfg, err := ctrl.GetConfig()
 	if err != nil {
 		kingpin.FatalIfError(err, "Cannot get API server rest config")
@@ -91,6 +100,7 @@ func main() {
 		Cache: cache.Options{
 			SyncPeriod: syncPeriod,
 		},
+		Scheme:                           s,
 		LeaderElection:             *leaderElection,
 		LeaderElectionID:           "crossplane-leader-election-provider-plausible",
 		LeaderElectionNamespace:    *leaderElectionNS,
@@ -113,10 +123,6 @@ func main() {
 	if *enableManagementPolicies {
 		o.Features.Enable(features.EnableAlphaManagementPolicies)
 		log.Info("Alpha feature enabled", "flag", features.EnableAlphaManagementPolicies)
-	}
-
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		kingpin.FatalIfError(err, "Cannot add Plausible APIs to scheme")
 	}
 
 	if err := plausiblecontroller.Setup(mgr, o); err != nil {

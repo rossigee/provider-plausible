@@ -18,8 +18,8 @@ package controller
 
 import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
-	"github.com/rossigee/provider-plausible/internal/controller/config"
 	"github.com/rossigee/provider-plausible/internal/controller/goal"
+	"github.com/rossigee/provider-plausible/internal/controller/providerconfig"
 	"github.com/rossigee/provider-plausible/internal/controller/site"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -27,14 +27,14 @@ import (
 // Setup creates all Plausible controllers with the supplied logger and adds them to
 // the supplied manager.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	for _, setup := range []func(ctrl.Manager, controller.Options) error{
-		config.Setup,
-		site.Setup,
-		goal.Setup,
-	} {
-		if err := setup(mgr, o); err != nil {
-			return err
-		}
+	if err := providerconfig.Setup(mgr); err != nil {
+		return err
+	}
+	if err := site.Setup(mgr, o); err != nil {
+		return err
+	}
+	if err := goal.Setup(mgr, o); err != nil {
+		return err
 	}
 	return nil
 }
