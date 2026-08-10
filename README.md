@@ -34,7 +34,7 @@ The Plausible provider enables platform teams to manage Plausible Analytics site
 - **Cross-references**: Reference sites from goals using Kubernetes selectors
 - **Observability**: Built-in status reporting and condition management
 
-## API Coverage
+## Resource Types
 
 **✅ Comprehensive Plausible API Support** - ~85% API coverage with 19 endpoints
 
@@ -64,7 +64,7 @@ The Plausible provider enables platform teams to manage Plausible Analytics site
   - `sites:custom-props:*` - Custom properties
   - `teams:read:*` - Team information (optional)
 
-## Installation
+## Getting Started
 
 ### Quick Start
 
