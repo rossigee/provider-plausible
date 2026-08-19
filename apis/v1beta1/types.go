@@ -111,4 +111,3 @@ var ProviderConfigUsageListGroupVersionKind = schema.GroupVersionKind{
 	Version: Version,
 	Kind:    "ProviderConfigUsageList",
 }
-

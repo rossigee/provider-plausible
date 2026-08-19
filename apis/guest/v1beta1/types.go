@@ -106,5 +106,3 @@ type GuestList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Guest `json:"items"`
 }
-
-

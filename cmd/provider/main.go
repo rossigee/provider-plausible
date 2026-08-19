@@ -100,7 +100,7 @@ func main() {
 		Cache: cache.Options{
 			SyncPeriod: syncPeriod,
 		},
-		Scheme:                           s,
+		Scheme:                     s,
 		LeaderElection:             *leaderElection,
 		LeaderElectionID:           "crossplane-leader-election-provider-plausible",
 		LeaderElectionNamespace:    *leaderElectionNS,

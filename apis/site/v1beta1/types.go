@@ -100,5 +100,3 @@ type SiteList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Site `json:"items"`
 }
-
-

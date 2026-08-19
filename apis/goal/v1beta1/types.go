@@ -106,5 +106,3 @@ type GoalList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Goal `json:"items"`
 }
-
-

@@ -100,5 +100,3 @@ type CustomPropertyList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []CustomProperty `json:"items"`
 }
-
-

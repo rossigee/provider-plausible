@@ -101,5 +101,3 @@ type SharedLinkList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []SharedLink `json:"items"`
 }
-
-
