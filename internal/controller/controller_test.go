@@ -17,8 +17,9 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	"testing"
+
+	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 )
 
 func TestSetup(t *testing.T) {
