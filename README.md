@@ -488,3 +488,6 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 - [Crossplane](https://crossplane.io/) team for the excellent provider framework
 - [Plausible Analytics](https://plausible.io/) for the privacy-focused analytics platform
+## Implementation
+
+This provider is a native Crossplane controller that directly implements the provider APIs without using Terraform or upjet scaffolding. This approach yields smaller binaries, simpler code, and reduced dependencies.
