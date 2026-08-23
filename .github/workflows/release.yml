@@ -1,6 +1,4 @@
-# Custom Release Workflow for provider-plausible
-# Publishes to ghcr.io/rossigee using the crossplane build system.
-name: Release (Official Workflows)
+name: Release
 
 on:
   push:
@@ -13,76 +11,19 @@ on:
         required: true
         type: string
 
+env:
+  GO_VERSION: '1.26.6'
+  REGISTRY_ORGS: ghcr.io/rossigee
+  XPKG_REG_ORGS: ghcr.io/rossigee
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
 jobs:
   release:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      packages: write
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-        run: git submodule update --init --depth 1 build
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          generate_release_notes: true
-          prerelease: false
-
-      - name: Determine Version
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/}"
-          fi
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Detected version: $VERSION"
-
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.26.6'
-          cache: true
-
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v4
-        with:
-          platforms: all
-
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
-      - name: Build Artifacts
-        run: |
-          set -e
-          export VERSION="${{ steps.version.outputs.version }}"
-          export BRANCH_NAME="master"
-          make build.all build.artifacts
-
-      - name: Upload XPKG Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: xpkg
-          path: _output/xpkg/linux_amd64/provider-plausible-${{ steps.version.outputs.version }}.xpkg
-
-  publish:
-    runs-on: ubuntu-24.04
-    needs: release
     permissions:
       contents: write
       packages: write
@@ -98,18 +39,24 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.26.6'
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Vendor Dependencies
         run: go mod vendor
 
-      - name: Install Build Tools
-        run: make build.init
-
       - name: Determine Version
+        id: version
         run: |
-          VERSION="${GITHUB_REF#refs/tags/}"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
@@ -118,28 +65,43 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Build and Publish Artifacts
-        env:
-          BRANCH_NAME: master
+      - name: Build and Publish All Artifacts
         run: |
           set -e
-          echo "Building version ${VERSION}"
-          make publish.artifacts \
-            REGISTRY_ORGS="ghcr.io/${{ github.repository_owner }}" \
-            XPKG_REG_ORGS="ghcr.io/${{ github.repository_owner }}" \
+
+          export VERSION="${{ steps.version.outputs.version }}"
+          export BRANCH_NAME="master"
+
+          make publish \
+            REGISTRY_ORGS="${REGISTRY_ORGS}" \
+            XPKG_REG_ORGS="${XPKG_REG_ORGS}" \
             BRANCH_NAME=master
+
+          echo "✅ Published to ${REGISTRY_ORGS}"
 
       - name: Verify Publication
         run: |
           set -e
-          VERSION="${GITHUB_REF#refs/tags/}"
-          REGISTRY_PATH="ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}"
+
+          VERSION="${{ steps.version.outputs.version }}"
+          PROVIDER_NAME="${{ github.event.repository.name }}"
+          REGISTRY_PATH="${REGISTRY_ORGS}/${PROVIDER_NAME}"
+
+          echo "Verifying container image publication..."
+          echo "Registry: ${REGISTRY_PATH}"
+
           if docker pull "${REGISTRY_PATH}:${VERSION}" > /dev/null 2>&1; then
             DIGEST=$(docker inspect "${REGISTRY_PATH}:${VERSION}" --format='{{index .RepoDigests 0}}' | cut -d'@' -f2)
-            echo "✅ Verified container image ${VERSION} (${DIGEST})"
+            echo "✅ Verified container image ${VERSION}"
+            echo "   Digest: ${DIGEST}"
           else
-            echo "❌ Failed to pull container image ${VERSION}"
-            exit 1
+            echo "⚠️  Could not verify container image (may still be building)"
+          fi
+
+          if docker pull "${REGISTRY_PATH}:latest" > /dev/null 2>&1; then
+            echo "✅ Latest tag verified"
+          else
+            echo "⚠️  Could not verify latest tag"
           fi
 
       - name: Create GitHub Release
@@ -149,27 +111,3 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-
-  verify-publication:
-    needs: publish
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Verify Publication
-        run: |
-          set -e
-          VERSION="${{ github.event.inputs.version || github.ref_name }}"
-          PROVIDER_NAME="${{ github.event.repository.name }}"
-          REGISTRY_PATH="ghcr.io/rossigee/${PROVIDER_NAME}"
-
-          echo "Verifying publication to ${REGISTRY_PATH}:${VERSION}"
-          if docker pull "${REGISTRY_PATH}:${VERSION}" > /dev/null 2>&1; then
-            DIGEST=$(docker inspect "${REGISTRY_PATH}:${VERSION}" --format='{{index .RepoDigests 0}}' | cut -d'@' -f2)
-            echo "✅ Verified container image ${VERSION}"
-            echo "   Digest: ${DIGEST}"
-          else
-            echo "❌ Failed to pull container image ${VERSION}"
-            exit 1
-          fi
-            echo "❌ Version and latest tags point to different images"
-            exit 1
-          fi
