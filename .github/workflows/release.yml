@@ -65,8 +65,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Setup build tools
-        run: make build.init
 
       - name: Build and Publish All Artifacts
         run: |
@@ -75,6 +73,7 @@ jobs:
           export VERSION="${{ steps.version.outputs.version }}"
           export BRANCH_NAME="master"
 
+          make build.init
           make publish \
             REGISTRY_ORGS="${REGISTRY_ORGS}" \
             XPKG_REG_ORGS="${XPKG_REG_ORGS}" \
