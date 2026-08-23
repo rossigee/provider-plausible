@@ -65,6 +65,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Setup build tools
+        run: make build.init
+
       - name: Build and Publish All Artifacts
         run: |
           set -e
