@@ -28,6 +28,12 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
 	"github.com/rossigee/provider-plausible/apis"
+	custompropertyv1beta1 "github.com/rossigee/provider-plausible/apis/customproperty/v1beta1"
+	goalv1beta1 "github.com/rossigee/provider-plausible/apis/goal/v1beta1"
+	guestv1beta1 "github.com/rossigee/provider-plausible/apis/guest/v1beta1"
+	sharedlinkv1beta1 "github.com/rossigee/provider-plausible/apis/sharedlink/v1beta1"
+	sitev1beta1 "github.com/rossigee/provider-plausible/apis/site/v1beta1"
+	teamv1beta1 "github.com/rossigee/provider-plausible/apis/team/v1beta1"
 	plausiblecontroller "github.com/rossigee/provider-plausible/internal/controller"
 	"github.com/rossigee/provider-plausible/internal/features"
 	"github.com/rossigee/provider-plausible/internal/tracing"
@@ -39,6 +45,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	metricserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+
+	"github.com/crossplane/crossplane-runtime/v2/pkg/statemetrics"
 )
 
 func main() {
@@ -51,6 +61,8 @@ func main() {
 		maxReconcileRate         = app.Flag("max-reconcile-rate", "The global maximum rate per second at which resources may checked for drift from the desired state.").Default("10").Int()
 		syncPeriod               = app.Flag("sync", "How often all resources will be double-checked for drift from the desired state.").Short('s').Default("1h").Duration()
 		enableManagementPolicies = app.Flag("enable-management-policies", "Enable support for management policies.").Default("true").OverrideDefaultFromEnvar("ENABLE_MANAGEMENT_POLICIES").Bool()
+		pollStateMetricInterval  = app.Flag("poll-state-metric", "State metric recording interval").Default("5s").Duration()
+		metricsBindAddress       = app.Flag("metrics-bind-address", "The address the metrics endpoint binds to.").Default(":8080").String()
 	)
 
 	kingpin.MustParse(app.Parse(os.Args[1:]))
@@ -107,9 +119,20 @@ func main() {
 		LeaderElectionResourceLock: "leases",
 		LeaseDuration:              func() *time.Duration { d := 60 * time.Second; return &d }(),
 		RenewDeadline:              func() *time.Duration { d := 50 * time.Second; return &d }(),
+		Metrics: metricserver.Options{
+			BindAddress: *metricsBindAddress,
+		},
 	})
 	if err != nil {
 		kingpin.FatalIfError(err, "Cannot create controller manager")
+	}
+
+	mrStateMetrics := statemetrics.NewMRStateMetrics()
+	metrics.Registry.MustRegister(mrStateMetrics)
+
+	mo := xpcontroller.MetricOptions{
+		PollStateMetricInterval: *pollStateMetricInterval,
+		MRStateMetrics:          mrStateMetrics,
 	}
 
 	o := xpcontroller.Options{
@@ -118,6 +141,7 @@ func main() {
 		PollInterval:            *pollInterval,
 		GlobalRateLimiter:       ratelimiter.NewGlobal(*maxReconcileRate),
 		Features:                &feature.Flags{},
+		MetricOptions:           &mo,
 	}
 
 	if *enableManagementPolicies {
@@ -128,6 +152,13 @@ func main() {
 	if err := plausiblecontroller.Setup(mgr, o); err != nil {
 		kingpin.FatalIfError(err, "Cannot setup Plausible controllers")
 	}
+
+	kingpin.FatalIfError(mgr.Add(statemetrics.NewMRStateRecorder(mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &sitev1beta1.SiteList{}, o.MetricOptions.PollStateMetricInterval)), "Cannot register state metrics for Site")
+	kingpin.FatalIfError(mgr.Add(statemetrics.NewMRStateRecorder(mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &goalv1beta1.GoalList{}, o.MetricOptions.PollStateMetricInterval)), "Cannot register state metrics for Goal")
+	kingpin.FatalIfError(mgr.Add(statemetrics.NewMRStateRecorder(mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &custompropertyv1beta1.CustomPropertyList{}, o.MetricOptions.PollStateMetricInterval)), "Cannot register state metrics for CustomProperty")
+	kingpin.FatalIfError(mgr.Add(statemetrics.NewMRStateRecorder(mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &guestv1beta1.GuestList{}, o.MetricOptions.PollStateMetricInterval)), "Cannot register state metrics for Guest")
+	kingpin.FatalIfError(mgr.Add(statemetrics.NewMRStateRecorder(mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &sharedlinkv1beta1.SharedLinkList{}, o.MetricOptions.PollStateMetricInterval)), "Cannot register state metrics for SharedLink")
+	kingpin.FatalIfError(mgr.Add(statemetrics.NewMRStateRecorder(mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &teamv1beta1.TeamList{}, o.MetricOptions.PollStateMetricInterval)), "Cannot register state metrics for Team")
 
 	kingpin.FatalIfError(mgr.AddHealthzCheck("healthz", healthz.Ping), "Cannot add health check")
 	kingpin.FatalIfError(mgr.AddReadyzCheck("readyz", healthz.Ping), "Cannot add ready check")
