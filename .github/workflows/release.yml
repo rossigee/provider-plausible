@@ -112,7 +112,7 @@ jobs:
         run: |
           mkdir -p .cache/tools/linux_x86_64
           curl -fsSLo .cache/tools/linux_x86_64/crossplane-cli-v2.5.0 \
-            https://releases.crossplane.io/stable/v2.5.0/bin/linux_amd64/crank
+            https://cli.crossplane.io/stable/v2.5.0/bin/linux_amd64/crank
           chmod +x .cache/tools/linux_x86_64/crossplane-cli-v2.5.0
 
       - name: Determine Version
