@@ -106,26 +106,6 @@ jobs:
           go-version: '1.27.1'
 
       - name: Vendor Dependencies
-        run: go mod vendor
-
-      - name: Install Crossplane CLI
-        run: |
-          mkdir -p .cache/tools/linux_x86_64
-          curl -fsSLo .cache/tools/linux_x86_64/crossplane-cli-v2.5.0 \
-            https://releases.crossplane.io/stable/v2.5.0/bin/linux_amd64/crank?source=build
-          chmod +x .cache/tools/linux_x86_64/crossplane-cli-v2.5.0
-
-      - name: Determine Version
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/}"
-          fi
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          echo "Detected version: $VERSION"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
