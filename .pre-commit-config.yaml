@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
@@ -13,10 +13,9 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-json
       - id: detect-private-key
-        exclude: ^(operator/minioutil/client_test\.go|operator/minioutil/client\.go|docs/TLS_CONFIGURATION\.md|samples/.*\.yaml)$
 
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 26.5.1
     hooks:
       - id: black
         language_version: python3
@@ -28,28 +27,32 @@ repos:
       - id: isort
         args: [--profile=black]
 
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v2.12.2
+  - repo: local
     hooks:
       - id: golangci-lint
-        args: [--timeout=5m]
+        name: golangci-lint
+        entry: golangci-lint run --timeout=5m
+        language: system
+        files: \.go$
+        pass_filenames: false
 
   - repo: https://github.com/tekwizely/pre-commit-golang
     rev: v1.0.0-rc.1
     hooks:
       - id: go-fmt
-        exclude: (zz_generated|internal/controller)
+        exclude: 'zz_generated\..*\.go$|tools/'
       - id: go-imports
-        exclude: (zz_generated|internal/controller)
+        exclude: 'zz_generated\..*\.go$|tools/'
       - id: go-vet-mod
+        exclude: 'tools/'
       - id: go-mod-tidy
+        exclude: 'tools/'
 
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
     hooks:
       - id: yamllint
         args: [-c=.yamllint.yaml]
-        exclude: ^package/  # generated CRD/webhook YAML; format is controlled by controller-gen
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.41.0
@@ -65,6 +68,12 @@ repos:
 
   - repo: local
     hooks:
+      - id: check-binaries
+        name: Check for binary files
+        entry: bash -c 'git ls-files | while read f; do test -x "$f" && file "$f" 2>/dev/null | grep -q "ELF" && echo "$f"; done | grep -v -E "^\.git/|^build/|^_output/|^.cache/|^scripts/" | grep -q . && { echo "Binary files found in git index"; exit 1; } || exit 0'
+        language: system
+        pass_filenames: false
+
       - id: go-generate
         name: go generate
         entry: make generate
@@ -96,6 +105,8 @@ repos:
           ]
 
           for filename in sys.argv[1:]:
+              if filename.endswith('.pre-commit-config.yaml') or filename.endswith('_test.go'):
+                  continue
               try:
                   with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
                       content = f.read()
@@ -108,4 +119,4 @@ repos:
           "
         language: system
         files: \.(go|yaml|yml|json|md|sh|env)$
-        exclude: ^(operator/minioutil/client\.go|operator/minioutil/client_test\.go|docs/TLS_CONFIGURATION\.md|samples/.*\.yaml)$
+        exclude: (\.pre-commit-config\.yaml$|_test\.go$)
