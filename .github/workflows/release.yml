@@ -1,10 +1,5 @@
 # Custom Release Workflow for provider-plausible
 # Publishes to ghcr.io/rossigee using the crossplane build system.
-#
-# Uses fetch-depth: 0 + submodules: false so that git fetch --unshallow is
-# never needed and the stale crossplane/build submodule history is never
-# traversed. The build submodule is initialised shallowly for the current
-# commit only.
 name: Release (Official Workflows)
 
 on:
@@ -106,6 +101,30 @@ jobs:
           go-version: '1.27.1'
 
       - name: Vendor Dependencies
+        run: go mod vendor
+
+      - name: Install Crossplane CLI v2.5.0 (from our fork)
+        run: |
+          set -e
+          mkdir -p .cache/tools/linux_x86_64
+          echo "Installing crank@v2.5.0 via go install (matches rossigee/build fork)"
+          GOBIN=$(pwd)/.cache/tools/linux_x86_64 go install github.com/crossplane/crossplane/cmd/crank@v2.5.0
+          if [ -f .cache/tools/linux_x86_64/crank ]; then
+            mv .cache/tools/linux_x86_64/crank .cache/tools/linux_x86_64/crossplane-cli-v2.5.0
+          fi
+          chmod +x .cache/tools/linux_x86_64/crossplane-cli-v2.5.0 || true
+
+      - name: Determine Version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "Detected version: $VERSION"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
