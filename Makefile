@@ -28,6 +28,7 @@ UPTEST_VERSION = v0.11.1
 
 # Setup Images
 IMAGES = provider-plausible
+REGISTRY_ORGS = ghcr.io/rossigee
 -include build/makelib/imagelight.mk
 
 # Setup XPKG - Standardized registry configuration
