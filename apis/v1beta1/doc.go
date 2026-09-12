@@ -16,6 +16,6 @@ limitations under the License.
 
 // Package v1beta1 contains the core resources of the Plausible provider.
 // +kubebuilder:object:generate=true
-// +groupName=plausible.crossplane.io
+// +groupName=plausible.m.crossplane.io
 // +versionName=v1beta1
 package v1beta1

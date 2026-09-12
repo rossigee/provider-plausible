@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.21.0
-  name: providerconfigs.plausible.crossplane.io
+  name: providerconfigs.plausible.m.crossplane.io
 spec:
-  group: plausible.crossplane.io
+  group: plausible.m.crossplane.io
   names:
     categories:
     - crossplane

@@ -11,4 +11,3 @@ spec:
     password: "secure123"
   providerConfigRef:
     name: default
-  deletionPolicy: Delete

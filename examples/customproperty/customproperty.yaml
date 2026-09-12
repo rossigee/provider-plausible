@@ -11,4 +11,3 @@ spec:
     description: "Customer segment tracking for marketing analytics"
   providerConfigRef:
     name: default
-  deletionPolicy: Delete

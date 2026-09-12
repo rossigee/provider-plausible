@@ -90,7 +90,7 @@ rm credentials.json  # Clean up
 Create a file named `provider-config.yaml`:
 
 ```yaml
-apiVersion: plausible.crossplane.io/v1beta1
+apiVersion: plausible.m.crossplane.io/v1beta1
 kind: ProviderConfig
 metadata:
   name: default
@@ -114,8 +114,8 @@ kubectl apply -f provider-config.yaml
 ### 3. Verify ProviderConfig
 
 ```bash
-kubectl get providerconfigs.plausible.crossplane.io
-kubectl describe providerconfig.plausible.crossplane.io default
+kubectl get providerconfigs.plausible.m.crossplane.io
+kubectl describe providerconfig.plausible.m.crossplane.io default
 ```
 
 ## Self-Hosted Plausible
@@ -123,7 +123,7 @@ kubectl describe providerconfig.plausible.crossplane.io default
 If you're using a self-hosted Plausible instance:
 
 ```yaml
-apiVersion: plausible.crossplane.io/v1beta1
+apiVersion: plausible.m.crossplane.io/v1beta1
 kind: ProviderConfig
 metadata:
   name: self-hosted
@@ -144,7 +144,7 @@ You can create multiple ProviderConfigs for different Plausible instances:
 
 ```yaml
 # Cloud instance
-apiVersion: plausible.crossplane.io/v1beta1
+apiVersion: plausible.m.crossplane.io/v1beta1
 kind: ProviderConfig
 metadata:
   name: plausible-cloud
@@ -157,7 +157,7 @@ spec:
       key: credentials
 ---
 # Self-hosted instance
-apiVersion: plausible.crossplane.io/v1beta1
+apiVersion: plausible.m.crossplane.io/v1beta1
 kind: ProviderConfig
 metadata:
   name: plausible-selfhosted
@@ -174,7 +174,7 @@ spec:
 Then reference the specific config in your resources:
 
 ```yaml
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: my-site
@@ -220,7 +220,7 @@ kubectl logs -n crossplane-system deployment/provider-plausible-*
 kubectl get secret plausible-credentials -n crossplane-system -o jsonpath='{.data.credentials}' | base64 -d
 
 # Check provider config status
-kubectl describe providerconfig.plausible.crossplane.io default
+kubectl describe providerconfig.plausible.m.crossplane.io default
 
 # List all Plausible resources
 kubectl get sites.site.plausible.crossplane.io

@@ -11,4 +11,3 @@ spec:
     role: "viewer"
   providerConfigRef:
     name: default
-  deletionPolicy: Delete

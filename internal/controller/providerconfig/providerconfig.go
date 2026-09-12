@@ -31,7 +31,7 @@ import (
 	"github.com/rossigee/provider-plausible/apis/v1beta1"
 )
 
-const controllerName = "providerconfig.plausible.crossplane.io"
+const controllerName = "providerconfig.plausible.m.crossplane.io"
 
 // Setup registers the ProviderConfig controller.
 func Setup(mgr ctrl.Manager) error {

@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1beta1 contains the v1beta1 group plausible.crossplane.io resources of the provider.
+// Package v1beta1 contains the v1beta1 group plausible.m.crossplane.io resources of the provider.
 // +kubebuilder:object:generate=true
-// +groupName=plausible.crossplane.io
+// +groupName=plausible.m.crossplane.io
 // +versionName=v1beta1
 package v1beta1
 
@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	Group   = "plausible.crossplane.io"
+	Group   = "plausible.m.crossplane.io"
 	Version = "v1beta1"
 )
 

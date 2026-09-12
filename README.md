@@ -98,7 +98,7 @@ kubectl create secret generic plausible-credentials \
 ### 2. Configure Provider
 
 ```yaml
-apiVersion: plausible.crossplane.io/v1beta1
+apiVersion: plausible.m.crossplane.io/v1beta1
 kind: ProviderConfig
 metadata:
   name: default
