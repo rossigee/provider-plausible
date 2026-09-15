@@ -42,6 +42,10 @@ var (
 )
 
 func addKnownTypes(s *runtime.Scheme) error {
+	s.AddKnownTypes(SchemeGroupVersion,
+		&CustomProperty{},
+		&CustomPropertyList{},
+	)
 	metav1.AddToGroupVersion(s, SchemeGroupVersion)
 	return nil
 }
