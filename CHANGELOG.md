@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.4.1] - 2026-09-18
+
+### Fixes
+
+- Register `customproperty.plausible.m.crossplane.io/v1beta1`,
+  `guest.plausible.m.crossplane.io/v1beta1`,
+  `sharedlink.plausible.m.crossplane.io/v1beta1`, and
+  `team.plausible.m.crossplane.io/v1beta1` in the scheme so that
+  `mgr.Add(NewMRStateRecorder(...))` does not fail at startup with
+  "no kind is registered for the type v1beta1.TeamList in scheme".
+
+  Without this fix, `provider-plausible` CrashLoopBackOff at every
+  startup (820+ restarts), preventing the metrics endpoint :8080 from
+  ever opening.
+
 ## [Unreleased]
 
 ## [0.1.0] - 2025-07-07
