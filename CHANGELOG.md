@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.4.2] - 2026-09-18
+
+### Changed
+
+- Replaced custom release workflow with the standardized
+  `release-template.yml` (`make publish ...`) so that the build
+  submodule's `xpkg.mk` / `imagelight.mk` directly produce both
+  container image and `.xpkg` for the same digest. The previous
+  workflow's `docker buildx build --file ./cluster/images/*/Dockerfile .`
+  failed with "/bin/linux_amd64/provider: not found".
+
 ## [0.1.0] - 2025-07-07
 
 ### Added
