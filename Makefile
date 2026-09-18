@@ -55,6 +55,12 @@ publish.artifacts:
 	$(foreach r,$(XPKG_REG_ORGS), $(foreach x,$(XPKGS),@$(MAKE) xpkg.release.publish.$(r).$(x)))
 	$(foreach r,$(REGISTRY_ORGS), $(foreach i,$(IMAGES),@$(MAKE) img.release.publish.$(r).$(i)))
 
+# Force the .xpkg to be built before publish pushes the package.
+# The rossigee/build fork's xpkg.mk defines xpkg.release.publish.<reg>.<pkg>
+# without depending on xpkg.build.<pkg>, so make publish would otherwise try
+# to crossplane xpkg push a non-existent file.
+xpkg.release.publish.ghcr.io/rossigee.provider-plausible: xpkg.build.provider-plausible
+
 # Setup Package Metadata
 CROSSPLANE_VERSION = 2.0.2
 -include build/makelib/local.xpkg.mk
