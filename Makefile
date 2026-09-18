@@ -57,9 +57,15 @@ publish.artifacts:
 
 # Force the .xpkg to be built before publish pushes the package.
 # The rossigee/build fork's xpkg.mk defines xpkg.release.publish.<reg>.<pkg>
-# without depending on xpkg.build.<pkg>, so make publish would otherwise try
-# to crossplane xpkg push a non-existent file.
-xpkg.release.publish.ghcr.io/rossigee.provider-plausible: xpkg.build.provider-plausible
+# without depending on xpkg.build.<pkg>, and the xpkg push command expects
+# --package-files for every linux_* in XPKG_LINUX_PLATFORMS — so make
+# publish would otherwise try to xpkg push non-existent files.
+#
+# Recurse the per-platform xpkg.build for every required architecture so
+# both _output/xpkg/linux_amd64/... and _output/xpkg/linux_arm64/... exist
+# when xpkg push runs.
+xpkg.release.publish.ghcr.io/rossigee.provider-plausible:
+	@$(foreach p,$(XPKG_LINUX_PLATFORMS),$(MAKE) xpkg.build.provider-plausible PLATFORM=$(p) || exit 1;)
 
 # Setup Package Metadata
 CROSSPLANE_VERSION = 2.0.2
