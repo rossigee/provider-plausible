@@ -46,17 +46,19 @@ XPKGS = provider-plausible
 # image is present in daemon.
 xpkg.build.provider-plausible: do.build.images
 
-# Force the .xpkg to be built before publish pushes the package.
-# The rossigee/build fork's xpkg.mk defines xpkg.release.publish.<reg>.<pkg>
-# without depending on xpkg.build.<pkg>, and the xpkg push command expects
-# --package-files for every linux_* in XPKG_LINUX_PLATFORMS — so make
-# publish would otherwise try to xpkg push non-existent files.
-#
-# Recurse the per-platform xpkg.build for every required architecture so
-# both _output/xpkg/linux_amd64/... and _output/xpkg/linux_arm64/... exist
-# when xpkg push runs.
+# Force the .xpkg to be built for every architecture before publish pushes
+# the package, AND keep the upstream xpkg push step (which the override
+# recipe replaces). The rossigee/build fork's xpkg.mk defines
+# xpkg.release.publish.<reg>.<pkg> without depending on xpkg.build.<pkg>,
+# and xpkg push expects --package-files for every linux_* in
+# XPKG_LINUX_PLATFORMS — so without this override make publish would try
+# to xpkg push non-existent files.
 xpkg.release.publish.ghcr.io/rossigee.provider-plausible:
 	@$(foreach p,$(XPKG_LINUX_PLATFORMS),$(MAKE) xpkg.build.provider-plausible PLATFORM=$(p) || exit 1;)
+	@$(CROSSPLANE_CLI) xpkg push \
+		$(foreach p,$(XPKG_LINUX_PLATFORMS),--package-files $(XPKG_OUTPUT_DIR)/$(p)/provider-plausible-$(VERSION).xpkg ) \
+		ghcr.io/rossigee/provider-plausible:$(VERSION)
+	@$(OK) Pushed package ghcr.io/rossigee/provider-plausible:$(VERSION)
 
 # Setup Package Metadata
 CROSSPLANE_VERSION = 2.0.2
