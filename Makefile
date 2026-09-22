@@ -121,3 +121,11 @@ install-crds: generate
 # Uninstall CRDs from a cluster
 uninstall-crds:
 	kubectl delete -f package/crds
+# Neutralize the plain runtime image push. imagelight.mk injects
+# img.release.publish.<reg>.<img> as a publish.artifacts prerequisite on
+# release branches, and cluster/images img.publish would fail because the
+# runtime image is never built/tagged locally. The runtime binary is already
+# embedded in the xpkg, so publishing this image would only overwrite the
+# xpkg's package.yaml.
+img.release.publish.ghcr.io/rossigee.provider-plausible:
+	@:
