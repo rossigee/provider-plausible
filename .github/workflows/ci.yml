@@ -1,5 +1,5 @@
 # Standardized CI/CD Template for Crossplane Providers
-# Version: 2026-08-20 - Updated for Go 1.27.1 + golangci-lint v2 + full security scanning
+# Version: 2026-09-08 - Updated for Go 1.27.1 + golangci-lint v2.13.2 + full security scanning
 #
 # This template implements CI builds and validates ONLY
 # - CI: Build validation only (no publishing to avoid tag conflicts)
@@ -54,6 +54,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          token: ${{ github.token }}
           submodules: true
 
       - name: Setup Go
@@ -75,6 +76,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          token: ${{ github.token }}
           submodules: true
 
       - name: Setup Go
@@ -98,6 +100,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          token: ${{ github.token }}
           submodules: true
           fetch-depth: 0
 
@@ -116,7 +119,7 @@ jobs:
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.out
+          file: ./coverage.out
           verbose: true
 
   security-scan:
@@ -130,6 +133,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          token: ${{ github.token }}
           submodules: true
 
       - name: Setup Go
@@ -162,14 +166,13 @@ jobs:
           GOWORK_DIR=$(dirname $GOWORK); rm -f $GOWORK 2>/dev/null; rmdir $GOWORK_DIR 2>/dev/null
 
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2.29.0
+        uses: securego/gosec@master
         with:
           args: '-no-fail -fmt sarif -out gosec-results.sarif ./...'
         continue-on-error: true
 
       - name: Fix Gosec SARIF format
         if: always() && hashFiles('gosec-results.sarif') != ''
-        continue-on-error: true
         run: |
           if [ -f gosec-results.sarif ]; then
             jq '.runs[].results[].locations[].physicalLocation.artifactLocation.uri |= if . == null or . == "" then "." else . end' gosec-results.sarif > gosec-results-fixed.sarif
@@ -217,7 +220,7 @@ jobs:
           echo "✅ Binary build successful"
           
           # Build Docker image locally (without push)
-          make build.all
+          make docker.build
           echo "✅ Docker image build successful"
           
           # Build Crossplane package locally (without push)
@@ -256,7 +259,7 @@ jobs:
 # 5. STANDARDIZED BUILD SYSTEM
 #    - Uses rossigee/build submodule (working fork)
 #    - Consistent make targets across all providers
-#    - Go 1.24.5 with proper version handling
+#    - Go 1.25.3 with proper version handling
 # 
 # To apply this template:
 # 1. Copy this structure to .github/workflows/ci.yml
