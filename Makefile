@@ -60,6 +60,10 @@ xpkg.release.publish.ghcr.io/rossigee.provider-plausible:
 		ghcr.io/rossigee/provider-plausible:$(VERSION)
 	@$(OK) Pushed package ghcr.io/rossigee/provider-plausible:$(VERSION)
 
+# Neutralize plain image publish for ghcr (xpkg uses same ref; plain push would clobber package.yaml)
+img.release.publish.ghcr.io/rossigee.provider-plausible:
+	@:
+
 # Setup Package Metadata
 CROSSPLANE_VERSION = 2.0.2
 -include build/makelib/local.xpkg.mk
