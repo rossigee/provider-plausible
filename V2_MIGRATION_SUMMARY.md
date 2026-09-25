@@ -18,7 +18,7 @@
 - **Resource Lifecycle**: Complete CRUD operations with proper error handling
 
 #### 3. ✅ **Modern Crossplane Patterns**
-- Uses crossplane-runtime v1.20.0
+- Uses crossplane-runtime v2.5.0
 - Standard managed resource lifecycle (Observe/Create/Update/Delete)
 - Proper condition management (Available, Creating, Deleting, ReconcileSuccess)
 - Connection secret publishing with API secret publisher
@@ -57,7 +57,7 @@
 - [x] **Management Policies**: Support for management policy framework  
 - [x] **Connection Details**: Proper secret management and output
 - [x] **External Name**: Standard external name annotation handling
-- [x] **Modern Runtime**: crossplane-runtime v1.20.0+
+- [x] **Modern Runtime**: crossplane-runtime v2.5.0+
 
 ### Quality Standards ✅
 - [x] **Clean Architecture**: Standard controller patterns

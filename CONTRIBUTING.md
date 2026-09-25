@@ -260,12 +260,11 @@ We follow semantic versioning:
 
 ### Release Checklist
 
-1. Update CHANGELOG.md
-2. Update version in package configuration
-3. Create and push git tag
-4. Build and push container image
-5. Create GitHub release
-6. Update documentation
+1. Update `VERSION`, `package/crossplane.yaml`, and current documentation references.
+2. Add the release entry to `CHANGELOG.md`.
+3. Open a release PR from `release/v0.4.9` based on `origin/master`.
+4. After merge, create and push the exact `v0.4.9` tag.
+5. Allow the tag-only workflow to build, publish, verify, and create the GitHub Release.
 
 ## Getting Help
 
