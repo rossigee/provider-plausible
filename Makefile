@@ -61,7 +61,7 @@ xpkg.release.publish.ghcr.io/rossigee.provider-plausible:
 	@$(OK) Pushed package ghcr.io/rossigee/provider-plausible:$(VERSION)
 
 # Setup Package Metadata
-CROSSPLANE_VERSION = 2.0.2
+CROSSPLANE_VERSION = 2.5.0
 -include build/makelib/local.xpkg.mk
 -include build/makelib/controlplane.mk
 

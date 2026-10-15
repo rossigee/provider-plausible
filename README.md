@@ -11,7 +11,7 @@ A [Crossplane v2 native](https://crossplane.io/) provider for managing [Plausibl
 
 ## Container Registry
 
-- **Primary**: `ghcr.io/rossigee/provider-plausible:v0.4.7`
+- **Primary**: `ghcr.io/rossigee/provider-plausible:v0.4.9`
 
 ## Overview
 
@@ -54,7 +54,7 @@ The Plausible provider enables platform teams to manage Plausible Analytics site
 
 ## Prerequisites
 
-- Kubernetes cluster with Crossplane v1.20+ installed
+- Kubernetes cluster with Crossplane v2.5+ installed
 - Plausible Analytics account with Sites API access
 - API key with comprehensive scopes:
   - `sites:provision:*` - Site management
@@ -69,7 +69,7 @@ The Plausible provider enables platform teams to manage Plausible Analytics site
 ### Quick Start
 
 ```bash
-kubectl crossplane install provider ghcr.io/rossigee/provider-plausible:v0.4.7
+kubectl crossplane install provider ghcr.io/rossigee/provider-plausible:v0.4.9
 ```
 
 ### Declarative Installation
@@ -80,7 +80,7 @@ kind: Provider
 metadata:
   name: provider-plausible
 spec:
-  package: ghcr.io/rossigee/provider-plausible:v0.4.7
+  package: ghcr.io/rossigee/provider-plausible:v0.4.9
 ```
 
 ## Configuration
@@ -431,7 +431,7 @@ kind: Provider
 metadata:
   name: provider-plausible
 spec:
-  package: ghcr.io/rossigee/provider-plausible:v0.4.7
+  package: ghcr.io/rossigee/provider-plausible:v0.4.9
   runtimeConfigRef:
     name: debug-config
 ---

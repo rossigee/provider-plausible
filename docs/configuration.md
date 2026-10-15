@@ -12,7 +12,7 @@ This guide walks through all configuration options for the Plausible provider.
 
 ## Prerequisites
 
-1. A Kubernetes cluster with Crossplane v1.20+ installed
+1. A Kubernetes cluster with Crossplane v2.5+ installed
 2. A Plausible Analytics account (either cloud or self-hosted)
 3. A Plausible API key with appropriate permissions
 
@@ -37,7 +37,7 @@ Your API key needs the following permissions:
 ### Option 1: Using Crossplane CLI
 
 ```bash
-kubectl crossplane install provider crossplane/provider-plausible:latest
+kubectl crossplane install provider ghcr.io/rossigee/provider-plausible:v0.4.9
 ```
 
 ### Option 2: Using Kubernetes Manifest
@@ -48,9 +48,9 @@ kind: Provider
 metadata:
   name: provider-plausible
 spec:
-  package: crossplane/provider-plausible:latest
+  package: ghcr.io/rossigee/provider-plausible:v0.4.9
   # Optional: specify a specific version
-  # package: crossplane/provider-plausible:v0.1.0
+  # package: ghcr.io/rossigee/provider-plausible:v0.4.9
 ```
 
 Apply the manifest:

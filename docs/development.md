@@ -124,7 +124,7 @@ The package will be at `_output/xpkg/`
 1. **Build and load image**
    ```bash
    make docker-build
-   kind load docker-image crossplane/provider-plausible:latest --name crossplane-dev
+   kind load docker-image ghcr.io/rossigee/provider-plausible:v0.4.9 --name crossplane-dev
    ```
 
 2. **Install provider**
@@ -134,7 +134,7 @@ The package will be at `_output/xpkg/`
    metadata:
      name: provider-plausible
    spec:
-     package: crossplane/provider-plausible:latest
+     package: ghcr.io/rossigee/provider-plausible:v0.4.9
      packagePullPolicy: Never  # Use local image
    ```
 
@@ -353,49 +353,17 @@ make run
 
 ## Release Process
 
-### 1. Update Version
+1. Update `VERSION`, `package/crossplane.yaml`, and current installation references.
+2. Add the release entry to `CHANGELOG.md`.
+3. Open a release PR from `release/v0.4.9` based on `origin/master`.
+4. After merge, create and push the exact release tag:
 
-```bash
-# Update version in:
-# - Makefile
-# - package/crossplane.yaml
-```
+   ```bash
+   git tag v0.4.9
+   git push origin v0.4.9
+   ```
 
-### 2. Generate Artifacts
-
-```bash
-make generate
-make build
-make xpkg-build
-```
-
-### 3. Run Tests
-
-```bash
-make test
-make e2e-test  # Requires test environment
-```
-
-### 4. Tag Release
-
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-### 5. Build and Push Images
-
-```bash
-make docker-build docker-push REGISTRY=crossplane
-make xpkg-build xpkg-push REGISTRY=crossplane
-```
-
-### 6. Create GitHub Release
-
-Include:
-- Changelog
-- Breaking changes
-- Migration guide (if applicable)
+5. The tag-only workflow builds and publishes `linux_amd64` and `linux_arm64` packages, aliases `latest`, verifies equal digests and both architectures, and creates the GitHub Release.
 
 ## Code Style
 
