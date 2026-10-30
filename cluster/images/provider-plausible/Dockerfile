@@ -12,7 +12,7 @@ LABEL org.opencontainers.image.documentation="https://github.com/rossigee/provid
 ARG TARGETOS
 ARG TARGETARCH
 
-ADD bin/${TARGETOS}_${TARGETARCH}/provider /usr/local/bin/crossplane-plausible-provider
+COPY bin/${TARGETOS}_${TARGETARCH}/provider /usr/local/bin/crossplane-plausible-provider
 
 USER 65532
 ENTRYPOINT ["crossplane-plausible-provider"]
