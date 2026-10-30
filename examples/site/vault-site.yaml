@@ -5,7 +5,7 @@ metadata:
   name: vault-site
 spec:
   forProvider:
-    domain: vault.golder.tech
+    domain: vault.example.com
     timezone: Asia/Bangkok
   providerConfigRef:
     name: default

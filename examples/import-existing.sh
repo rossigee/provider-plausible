@@ -5,11 +5,11 @@ echo "Importing existing Plausible resources..."
 
 # List of known domains that likely have Plausible tracking
 DOMAINS=(
-    "debs.golder.tech"
-    "dynamicip.golder.org" 
-    "vault.golder.tech"
-    "sso.golder.tech"
-    "vaultwarden.golder.org"
+    "debs.example.com"
+    "dynamicip.example.org" 
+    "vault.example.com"
+    "sso.example.com"
+    "vaultwarden.example.org"
 )
 
 echo "Checking provider status..."

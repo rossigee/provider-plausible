@@ -5,7 +5,7 @@ metadata:
   name: dynamicip-site
 spec:
   forProvider:
-    domain: dynamicip.golder.org
+    domain: dynamicip.example.org
     timezone: Asia/Bangkok
   providerConfigRef:
     name: default

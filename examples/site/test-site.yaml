@@ -5,7 +5,7 @@ metadata:
   name: test-site
 spec:
   forProvider:
-    domain: debs.golder.tech
+    domain: debs.example.com
     timezone: Asia/Bangkok
   providerConfigRef:
     name: default
