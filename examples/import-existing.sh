@@ -16,7 +16,7 @@ echo "Checking provider status..."
 kubectl get providers.pkg.crossplane.io provider-plausible -o wide
 
 echo "Checking provider configuration..."
-kubectl get providerconfigs.plausible.crossplane.io default -o yaml
+kubectl get providerconfigs.plausible.m.crossplane.io default -o yaml
 
 echo "Creating sites for import..."
 for domain in "${DOMAINS[@]}"; do
@@ -24,7 +24,7 @@ for domain in "${DOMAINS[@]}"; do
     
     # Create the site resource with the external-name annotation for import
     cat <<EOF | kubectl apply -f -
-apiVersion: site.plausible.crossplane.io/v1alpha1
+apiVersion: site.plausible.m.crossplane.io/v1beta1
 kind: Site
 metadata:
   name: $(echo "$domain" | tr '.' '-')
@@ -43,13 +43,13 @@ echo "Waiting for sites to sync..."
 sleep 10
 
 echo "Checking site status..."
-kubectl get sites.site.plausible.crossplane.io -o wide
+kubectl get sites.site.plausible.m.crossplane.io -o wide
 
 echo "Checking site details..."
 for domain in "${DOMAINS[@]}"; do
     site_name=$(echo "$domain" | tr '.' '-')
     echo "=== Site: $domain ==="
-    kubectl get sites.site.plausible.crossplane.io "$site_name" -o yaml | grep -A 10 -B 5 conditions || echo "No conditions found"
+    kubectl get sites.site.plausible.m.crossplane.io "$site_name" -o yaml | grep -A 10 -B 5 conditions || echo "No conditions found"
     echo
 done
 
